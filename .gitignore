@@ -1,0 +1,15 @@
+*.pyc
+.DS_Store
+docs/_build
+build/
+dist/
+calistar.egg-info/
+.coverage*
+coverage.xml
+.pytest_cache/
+htmlcov/
+.tox/
+docs/calib_*
+docs/target_*
+calib_*
+target_*
