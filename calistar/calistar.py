@@ -10,7 +10,6 @@ import warnings
 from typing import Dict, List, Optional, Tuple, Union
 
 import astropy.units as u
-
 import numpy as np
 import pandas as pd
 

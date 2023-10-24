@@ -41,6 +41,7 @@ clean:
 	rm -f target_*
 	rm -rf .pytest_cache/
 	rm -rf docs/_build/
+	rm -rf docs/.ipynb_checkpoints/
 	rm -rf build/
 	rm -rf dist/
 	rm -rf calistar.egg-info/
