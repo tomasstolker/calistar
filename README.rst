@@ -22,7 +22,7 @@
 .. image:: https://img.shields.io/github/license/tomasstolker/calistar
    :target: https://github.com/tomasstolker/calistar/blob/main/LICENSE
 
-*calistar* is a tool for finding a suitable calibration star for reference star differential imaging or interferometric observations. The package has been released on `PyPI <https://pypi.org/project/calistar/>`_ and is actively developed and maintained on Github.
+*calistar* is a tool to search for a single calibration star. For example to be used for reference-star differential imaging or aperture masking interferometry. The package has been released on `PyPI <https://pypi.org/project/calistar/>`_ and is actively developed and maintained on Github.
 
 Documentation
 -------------

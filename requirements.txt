@@ -3,5 +3,7 @@ astroquery
 matplotlib
 numpy
 pandas
+pooch
 rich
+tqdm
 typeguard

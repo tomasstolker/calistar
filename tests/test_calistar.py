@@ -24,4 +24,4 @@ class TestCaliStar:
 
     def test_select_calib(self) -> None:
 
-        self.cal_star.select_calib(filter_names=["2MASS H"], mag_diff=5.)
+        self.cal_star.select_calib(filter_names=["2MASS/2MASS.H"], mag_diff=5.)
