@@ -3,7 +3,7 @@
 Documentation for *calistar*
 ============================
 
-*calistar* is a tool for finding a suitable calibration star.
+*calistar* is a tool to search for a single calibration star.
 
 .. toctree::
    :maxdepth: 2
