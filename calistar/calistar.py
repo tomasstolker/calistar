@@ -287,6 +287,17 @@ class CaliStar:
             mag_rp_error,
         )
 
+        target_dict[f"GAIA/GAIA{self.gaia_idx}.Grp"] = (
+            float(gaia_result["phot_rp_mean_mag"][0]),
+            mag_rp_error,
+        )
+
+        if "grvs_mag" in gaia_result.columns:
+            target_dict[f"GAIA/GAIA{self.gaia_idx}.Grvs"] = (
+                float(gaia_result["grvs_mag"][0]),
+                float(gaia_result["grvs_mag_error"][0]),
+            )
+
         # Create SkyCoord object from the RA and Dec of the selected Gaia source ID
 
         gaia_coord = SkyCoord(
@@ -315,8 +326,12 @@ class CaliStar:
             f"+/- {gaia_result['parallax_error'][0]:.2f} mas"
         )
 
-        print(f"\nRA = {gaia_result['ra'][0]:.6f} deg")
-        print(f"Dec = {gaia_result['dec'][0]:.6f} deg")
+        print(
+            f"\nRA = {gaia_result['ra'][0]:.6f} deg +/- {gaia_result['ra_error'][0]:.4f} mas"
+        )
+        print(
+            f"Dec = {gaia_result['dec'][0]:.6f} deg +/- {gaia_result['dec_error'][0]:.4f} mas"
+        )
         print(f"Coordinates = {coord_str}")
 
         print(
@@ -337,9 +352,21 @@ class CaliStar:
                 f"+/- {gaia_result['radial_velocity_error'][0]:.2f} km/s"
             )
 
-        print(f"\nG mean mag = {gaia_result['phot_g_mean_mag'][0]:.6f}")
-        print(f"BP mean mag = {gaia_result['phot_bp_mean_mag'][0]:.6f}")
-        print(f"RP mean mag = {gaia_result['phot_rp_mean_mag'][0]:.6f}")
+        print(
+            f"\nG mag = {gaia_result['phot_g_mean_mag'][0]:.6f} +/- {mag_g_error:.6f}"
+        )
+        print(
+            f"BP mag = {gaia_result['phot_bp_mean_mag'][0]:.6f} +/- {mag_bp_error:.6f}"
+        )
+        print(
+            f"RP mag = {gaia_result['phot_rp_mean_mag'][0]:.6f} +/- {mag_rp_error:.6f}"
+        )
+
+        if "grvs_mag" in gaia_result.columns:
+            print(
+                f"GRVS mag = {gaia_result['grvs_mag'][0]:.6f} "
+                f"+/- {gaia_result['grvs_mag_error'][0]:.6f}"
+            )
 
         if "teff_gspphot" in gaia_result.columns and not np.ma.is_masked(
             gaia_result["teff_gspphot"]
