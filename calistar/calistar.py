@@ -167,12 +167,22 @@ class CaliStar:
     @typechecked
     def target_star(
         self,
+        write_json: bool = True,
     ) -> Dict[str, Union[str, float]]:
         """
         Function for retrieving the the astrometric and
         photometric properties of a target star of interest. The
         function returns a dictionary with the properties, but it
-        also stores the data in a JSON file in the working folder.
+        also (optionally) stores the data in a JSON file in the
+        working folder.
+
+        Parameters
+        ----------
+        write_json : bool
+            Write the target properties to a JSON file (default: True).
+            The file will be stored in the working folder and starts
+            with ``target_``. The filename contains also the Gaia
+            release and the Gaia source ID of the target.
 
         Returns
         -------
@@ -377,16 +387,7 @@ class CaliStar:
             print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
 
         if "non_single_star" in gaia_result.columns:
-            if gaia_result["non_single_star"][0] == 0:
-                print("\nNon single star = False")
-
-            elif gaia_result["non_single_star"][0] == 1:
-                print("\nNon single star = True")
-
-            else:
-                warnings.warn(
-                    f"The 'non_single_star' value is {gaia_result['non_single_star'][0]}"
-                )
+            print(f"\nNon single star = {gaia_result['non_single_star'][0]}")
 
         if "classprob_dsc_combmod_star" in gaia_result.columns:
             print(
@@ -530,10 +531,12 @@ class CaliStar:
             float(vizier_result["e_W4mag"]),
         )
 
-        json_file = f"target_{self.gaia_release.lower()}_{self.gaia_source}.json"
+        if write_json:
+            json_file = f"target_{self.gaia_release.lower()}_{self.gaia_source}.json"
+            print(f"\nStoring output: {json_file}")
 
-        with open(json_file, "w", encoding="utf-8") as open_file:
-            json.dump(target_dict, open_file, indent=4)
+            with open(json_file, "w", encoding="utf-8") as open_file:
+                json.dump(target_dict, open_file, indent=4)
 
         return target_dict
 
@@ -542,12 +545,13 @@ class CaliStar:
         self,
         search_radius: float = 0.1,
         g_mag_range: Optional[Tuple[float, float]] = None,
+        write_csv: bool = True,
     ) -> pd.DataFrame:
         """
         Function for finding calibration stars. The function returns a
         ``DataFrame`` with the sources that are queried from the Gaia
-        catalog, but it also stores the data in a CSV file in the
-        working folder. The table also contains 2MASS and WISE
+        catalog, but it also (optionally) stores the data in a CSV file
+        in the working folder. The table also contains 2MASS and WISE
         magnitudes, and data from The Washington Visual Double Star
         Catalog. It is recommended to open the CSV file in a
         spreadsheet editor for easy visualization.
@@ -573,6 +577,11 @@ class CaliStar:
             :math:`\\pm` 1.0 mag (i.e. ``g_mag_range=(-1.0, 1.0)``)
             is used if the argument of ``g_mag_range`` is set to
             ``None``.
+        write_csv : bool
+            Write the table with found source to a CSV file (default:
+            True). The file will be stored in the working folder and
+            starts with ``calib_find_``. The filename contains also
+            the Gaia release and the Gaia source ID of the target.
 
         Returns
         -------
@@ -580,9 +589,12 @@ class CaliStar:
             A ``DataFrame`` with the table of queried sources.
         """
 
-        print("\n-> Finding calibration stars...\n")
+        json_file = Path(f"target_{self.gaia_release.lower()}_{self.gaia_source}.json")
 
-        json_file = f"target_{self.gaia_release.lower()}_{self.gaia_source}.json"
+        if not json_file.exists():
+            self.target_star(write_json=True)
+
+        print("\n-> Finding calibration stars...\n")
 
         with open(json_file, "r", encoding="utf-8") as open_file:
             target_dict = json.load(open_file)
@@ -609,6 +621,8 @@ class CaliStar:
 
         mag_low = target_dict[f"GAIA/GAIA{self.gaia_idx}.G"][0] + g_mag_range[0]
         mag_upp = target_dict[f"GAIA/GAIA{self.gaia_idx}.G"][0] + g_mag_range[1]
+
+        print(f"G mag search range = ({mag_low:.2f}, {mag_upp:.2f})")
 
         gaia_query = f"""
         SELECT *, DISTANCE({target_dict['Gaia RA'][0]},
@@ -814,11 +828,14 @@ class CaliStar:
         cal_df = cal_df.drop(index=drop_indices)
         cal_df["Gaia ID"] = cal_df["Gaia ID"].astype("int")
 
-        output_file = f"calib_find_{self.gaia_release.lower()}_{self.gaia_source}.csv"
+        if write_csv:
+            output_file = (
+                f"calib_find_{self.gaia_release.lower()}_{self.gaia_source}.csv"
+            )
 
-        print(f"Storing output: {output_file}")
+            print(f"Storing output: {output_file}")
 
-        cal_df.to_csv(path_or_buf=output_file, header=True, index=False)
+            cal_df.to_csv(path_or_buf=output_file, header=True, index=False)
 
         return cal_df
 
@@ -827,13 +844,14 @@ class CaliStar:
         self,
         filter_names: Optional[List[str]] = None,
         mag_diff: Union[float, Dict[str, float]] = 0.1,
+        write_csv: bool = True,
     ) -> pd.DataFrame:
         """
         Function for selecting the calibration stars. The function
         returns a ``DataFrame`` with the selected sources, but it also
-        stores the data in a CSV file in the working folder. It is
-        recommended to open the CSV file in a spreadsheet editor for
-        easy visualization.
+        (optionally) stores the data in a CSV file in the working
+        folder. It is recommended to open the CSV file in a spreadsheet
+        editor for easy visualization.
 
         Parameters
         ----------
@@ -855,6 +873,11 @@ class CaliStar:
             should be the filter names that are listed in
             ``filter_names`` and the values are the allowed magnitude
             differences for each filter.
+        write_csv : bool
+            Write the table with found source to a CSV file (default:
+            True). The file will be stored in the working folder and
+            starts with ``calib_select_``. The filename contains also
+            the Gaia release and the Gaia source ID of the target.
 
         Returns
         -------
@@ -862,9 +885,12 @@ class CaliStar:
             The ``DataFrame`` with the selected calibration stars.
         """
 
-        print("\n-> Selecting calibration stars...\n")
+        json_file = Path(f"target_{self.gaia_release.lower()}_{self.gaia_source}.json")
 
-        json_file = f"target_{self.gaia_release.lower()}_{self.gaia_source}.json"
+        if not json_file.exists():
+            self.target_star(write_json=True)
+
+        print("\n-> Selecting calibration stars...\n")
 
         with open(json_file, "r", encoding="utf-8") as open_file:
             target_dict = json.load(open_file)
@@ -886,8 +912,23 @@ class CaliStar:
                 f"dictionary of 'mag_diff', {list(mag_diff.keys())}."
             )
 
+        csv_file = Path(
+            f"calib_find_{self.gaia_release.lower()}_{self.gaia_source}.csv"
+        )
+
+        if not csv_file.exists():
+            err_msg = (
+                "The CSV file with pre-selected calibration "
+                "sources is not found. Please make sure to run "
+                "the 'find_calib()' method before "
+                "'select_calib()', and set the argument of "
+                "'write_csv' to True."
+            )
+
+            raise FileNotFoundError(err_msg)
+
         cal_df = pd.read_csv(
-            filepath_or_buffer=f"calib_find_{self.gaia_release.lower()}_{self.gaia_source}.csv",
+            filepath_or_buffer=csv_file,
             header=0,
             index_col=False,
         )
@@ -909,10 +950,13 @@ class CaliStar:
 
         print(f"Number of selected sources: {len(cal_df)}")
 
-        output_file = f"calib_select_{self.gaia_release.lower()}_{self.gaia_source}.csv"
+        if write_csv:
+            output_file = (
+                f"calib_select_{self.gaia_release.lower()}_{self.gaia_source}.csv"
+            )
 
-        print(f"Storing output: {output_file}")
+            print(f"Storing output: {output_file}")
 
-        cal_df.to_csv(path_or_buf=output_file, header=True, index=False)
+            cal_df.to_csv(path_or_buf=output_file, header=True, index=False)
 
         return cal_df
