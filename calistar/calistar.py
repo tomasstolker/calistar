@@ -386,18 +386,21 @@ class CaliStar:
             print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
             print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
 
+        print(
+            f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
+        )
+
+        if "ruwe" in gaia_result.columns:
+            print(f"RUWE = {gaia_result['ruwe'][0]:.2f}")
+
         if "non_single_star" in gaia_result.columns:
-            print(f"\nNon single star = {gaia_result['non_single_star'][0]}")
+            print(f"Non single star = {gaia_result['non_single_star'][0]}")
 
         if "classprob_dsc_combmod_star" in gaia_result.columns:
             print(
                 "Single star probability from DSC-Combmod = "
                 f"{gaia_result['classprob_dsc_combmod_star'][0]:.2f}"
             )
-
-        print(
-            f"Astrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
-        )
 
         if "has_xp_continuous" in gaia_result.columns:
             print(f"\nXP continuous = {gaia_result['has_xp_continuous'][0]}")
@@ -627,7 +630,7 @@ class CaliStar:
         gaia_query = f"""
         SELECT *, DISTANCE({target_dict['Gaia RA'][0]},
         {target_dict['Gaia Dec'][0]}, ra, dec) AS ang_sep
-        FROM gaiadr3.gaia_source
+        FROM gaia{self.gaia_release.lower()}.gaia_source
         WHERE DISTANCE({target_dict['Gaia RA'][0]},
         {target_dict['Gaia Dec'][0]}, ra, dec) < {search_radius}
         AND phot_g_mean_mag > {mag_low}
@@ -647,9 +650,10 @@ class CaliStar:
             "Gaia ID",
             "SpT",
             "Separation",
+            "Astrometric excess noise",
+            "RUWE",
             "Non single star",
             "Single star probability",
-            "Astrometric excess noise",
         ]
 
         columns += self.all_filters
@@ -776,7 +780,7 @@ class CaliStar:
                 # This query returns no sources?
                 # gaia_query = f"""
                 # SELECT *
-                # FROM gaiadr3.allwise_best_neighbour
+                # FROM gaia{self.gaia_release.lower()}.allwise_best_neighbour
                 # WHERE source_id = {self.gaia_source}
                 # """
                 # gaia_job = Gaia.launch_job_async(gaia_query,
@@ -786,17 +790,22 @@ class CaliStar:
             else:
                 drop_indices.append(gaia_item.index)
 
-            cal_df.loc[gaia_item.index, "Non single star"] = gaia_item[
-                "non_single_star"
-            ]
-
-            cal_df.loc[gaia_item.index, "Single star probability"] = gaia_item[
-                "classprob_dsc_combmod_star"
-            ]
-
             cal_df.loc[gaia_item.index, "Astrometric excess noise"] = gaia_item[
                 "astrometric_excess_noise"
             ]
+
+            if "ruwe" in gaia_item:
+                cal_df.loc[gaia_item.index, "RUWE"] = gaia_item["ruwe"]
+
+            if "non_single_star" in gaia_item:
+                cal_df.loc[gaia_item.index, "Non single star"] = gaia_item[
+                    "non_single_star"
+                ]
+
+            if "classprob_dsc_combmod_star" in gaia_item:
+                cal_df.loc[gaia_item.index, "Single star probability"] = gaia_item[
+                    "classprob_dsc_combmod_star"
+                ]
 
             # Query The Washington Visual Double Star Catalog
 
