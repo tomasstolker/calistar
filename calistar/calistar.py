@@ -21,6 +21,7 @@ from astropy.table import Table
 from astroquery.gaia import Gaia
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
+from gaiaxpy import calibrate, plot_spectra
 from rich import print as rprint
 from rich.progress import track
 from typeguard import typechecked
@@ -411,18 +412,62 @@ class CaliStar:
         if "has_rvs" in gaia_result.columns:
             print(f"RVS spectrum = {gaia_result['has_rvs'][0]}")
 
-        # Add spectral type and 2MASS JHKs magnitudes to the Simbad output
+        # Gaia XP spectrum
+
+        if (
+            "has_xp_continuous" in gaia_result.columns
+            and gaia_result["has_xp_continuous"][0]
+        ):
+            # Sampling adopted from the Gaia XP documentation
+            df_cal, sampling = calibrate(
+                input_object=[f"{self.gaia_source}"],
+                sampling=np.geomspace(330, 1049.9999999999, 361),
+                truncation=False,
+                with_correlation=False,
+                output_path="./",
+                # output_file=f"{self.gaia_source}_gaiaxp",
+                output_format=None,
+                save_file=False,
+                username=None,
+                password=None,
+            )
+
+            xp_plot = f"{self.gaia_source}_gaiaxp"
+            print(f"\nStoring Gaia XP plot: {xp_plot}_0.jpg")
+
+            plot_spectra(
+                spectra=df_cal,
+                sampling=sampling,
+                multi=False,
+                show_plot=False,
+                output_path="./",
+                output_file=xp_plot,
+                format=None,
+                legend=True,
+            )
+
+            xp_wavel = sampling * 1e-3  # (nm) -> (um)
+            xp_flux = 1e3 * df_cal["flux"].to_numpy()[0]  # (W m-2 nm-1) -> (W m-2 um-1)
+            xp_error = 1e3 * df_cal["flux_error"].to_numpy()[0]
+
+            header = "Wavelength (um) - Flux (W m-2 um-1) - Uncertainty (W m-2 um-1)"
+            xp_file = f"{self.gaia_source}_gaiaxp_spec.dat"
+            xp_spec = np.column_stack([xp_wavel, xp_flux, xp_error])
+            np.savetxt(xp_file, xp_spec, header=header)
+            print(f"Storing Gaia XP spectrum: {xp_file}")
+
+        # Add spectral type to the Simbad output
 
         # print(Simbad.list_votable_fields())
 
         Simbad.add_votable_fields(
             "sptype",
-            "flux(J)",
-            "flux(H)",
-            "flux(K)",
-            "flux_error(J)",
-            "flux_error(H)",
-            "flux_error(K)",
+            # "flux(J)",
+            # "flux(H)",
+            # "flux(K)",
+            # "flux_error(J)",
+            # "flux_error(H)",
+            # "flux_error(K)",
         )
 
         # Simbad query for selected Gaia source ID
@@ -439,104 +484,153 @@ class CaliStar:
 
         print(f"Spectral type = {simbad_result['SP_TYPE']}")
 
-        print(
-            f"\n2MASS J mag = {simbad_result['FLUX_J']:.3f} "
-            f"+/- {simbad_result['FLUX_ERROR_J']:.3f}"
-        )
-
-        print(
-            f"2MASS H mag = {simbad_result['FLUX_H']:.3f} "
-            f"+/- {simbad_result['FLUX_ERROR_H']:.3f}"
-        )
-
-        print(
-            f"2MASS Ks mag = {simbad_result['FLUX_K']:.3f} "
-            f"+/- {simbad_result['FLUX_ERROR_K']:.3f}"
-        )
+        # print(
+        #     f"\n2MASS J mag = {simbad_result['FLUX_J']:.3f} "
+        #     f"+/- {simbad_result['FLUX_ERROR_J']:.3f}"
+        # )
+        #
+        # print(
+        #     f"2MASS H mag = {simbad_result['FLUX_H']:.3f} "
+        #     f"+/- {simbad_result['FLUX_ERROR_H']:.3f}"
+        # )
+        #
+        # print(
+        #     f"2MASS Ks mag = {simbad_result['FLUX_K']:.3f} "
+        #     f"+/- {simbad_result['FLUX_ERROR_K']:.3f}"
+        # )
 
         target_dict["Simbad ID"] = simbad_result["MAIN_ID"]
 
         target_dict["SpT"] = simbad_result["SP_TYPE"]
 
-        target_dict["2MASS/2MASS.J"] = (
-            float(simbad_result["FLUX_J"]),
-            float(simbad_result["FLUX_ERROR_J"]),
-        )
-
-        target_dict["2MASS/2MASS.H"] = (
-            float(simbad_result["FLUX_H"]),
-            float(simbad_result["FLUX_ERROR_H"]),
-        )
-
-        target_dict["2MASS/2MASS.Ks"] = (
-            float(simbad_result["FLUX_K"]),
-            float(simbad_result["FLUX_ERROR_K"]),
-        )
+        # target_dict["2MASS/2MASS.J"] = (
+        #     float(simbad_result["FLUX_J"]),
+        #     float(simbad_result["FLUX_ERROR_J"]),
+        # )
+        #
+        # target_dict["2MASS/2MASS.H"] = (
+        #     float(simbad_result["FLUX_H"]),
+        #     float(simbad_result["FLUX_ERROR_H"]),
+        # )
+        #
+        # target_dict["2MASS/2MASS.Ks"] = (
+        #     float(simbad_result["FLUX_K"]),
+        #     float(simbad_result["FLUX_ERROR_K"]),
+        # )
 
         # VizieR query for the selected Gaia source ID
         # Sort the result by distance from the queried object
 
         print("\n-> Querying VizieR...\n")
 
-        vizier_obj = Vizier(columns=["*", "+_r"], catalog="II/328/allwise")
+        vizier_obj = Vizier(
+            columns=["*", "+_r"], catalog=["II/246/out", "II/328/allwise"]
+        )
 
         radius = u.Quantity(1.0 * u.arcmin)
 
         vizier_result = vizier_obj.query_object(
             f"GAIA {self.gaia_release} {self.gaia_source}", radius=radius
         )
-        vizier_result = vizier_result["II/328/allwise"]
 
-        # print(f"Found {len(vizier_result)} object(s) in VizieR. Selecting the first object...")
-        vizier_result = vizier_result[0]
+        # 2MASS data from VizieR
 
-        print(f"ALLWISE source ID = {vizier_result['AllWISE']}")
+        vizier_2mass = vizier_result["II/246/out"]
+        vizier_2mass = vizier_2mass[0]
+
+        print(f"2MASS source ID = {vizier_2mass['_2MASS']}")
+
+        print(
+            f"Separation between Gaia and 2MASS source = "
+            f"{1e3*vizier_2mass['_r']:.1f} mas"
+        )
+
+        print(
+            f"\n2MASS J mag = {vizier_2mass['Jmag']:.3f} "
+            f"+/- {vizier_2mass['e_Jmag']:.3f}"
+        )
+
+        print(
+            f"2MASS H mag = {vizier_2mass['Hmag']:.3f} "
+            f"+/- {vizier_2mass['e_Hmag']:.3f}"
+        )
+
+        print(
+            f"2MASS Ks mag = {vizier_2mass['Kmag']:.3f} "
+            f"+/- {vizier_2mass['e_Kmag']:.3f}"
+        )
+
+        target_dict["2MASS/2MASS.J"] = (
+            float(vizier_2mass["Jmag"]),
+            float(vizier_2mass["e_Jmag"]),
+        )
+        target_dict["2MASS/2MASS.H"] = (
+            float(vizier_2mass["Hmag"]),
+            float(vizier_2mass["e_Hmag"]),
+        )
+        target_dict["2MASS/2MASS.Ks"] = (
+            float(vizier_2mass["Kmag"]),
+            float(vizier_2mass["e_Kmag"]),
+        )
+
+        # WISE data from VizieR
+
+        vizier_wise = vizier_result["II/328/allwise"]
+        vizier_wise = vizier_wise[0]
+
+        print(f"\nALLWISE source ID = {vizier_wise['AllWISE']}")
 
         print(
             f"Separation between Gaia and ALLWISE source = "
-            f"{1e3*vizier_result['_r']:.1f} mas"
+            f"{1e3*vizier_wise['_r']:.1f} mas"
         )
 
         print(
-            f"\nWISE W1 mag = {vizier_result['W1mag']:.3f} "
-            f"+/- {vizier_result['e_W1mag']:.3f}"
+            f"\nWISE W1 mag = {vizier_wise['W1mag']:.3f} "
+            f"+/- {vizier_wise['e_W1mag']:.3f}"
         )
 
         print(
-            f"WISE W2 mag = {vizier_result['W2mag']:.3f} "
-            f"+/- {vizier_result['e_W2mag']:.3f}"
+            f"WISE W2 mag = {vizier_wise['W2mag']:.3f} "
+            f"+/- {vizier_wise['e_W2mag']:.3f}"
         )
 
         print(
-            f"WISE W3 mag = {vizier_result['W3mag']:.3f} "
-            f"+/- {vizier_result['e_W3mag']:.3f}"
+            f"WISE W3 mag = {vizier_wise['W3mag']:.3f} "
+            f"+/- {vizier_wise['e_W3mag']:.3f}"
         )
 
         print(
-            f"WISE W4 mag = {vizier_result['W4mag']:.3f} "
-            f"+/- {vizier_result['e_W4mag']:.3f}"
+            f"WISE W4 mag = {vizier_wise['W4mag']:.3f} "
+            f"+/- {vizier_wise['e_W4mag']:.3f}"
         )
 
         target_dict["WISE/WISE.W1"] = (
-            float(vizier_result["W1mag"]),
-            float(vizier_result["e_W4mag"]),
+            float(vizier_wise["W1mag"]),
+            float(vizier_wise["e_W4mag"]),
         )
+
         target_dict["WISE/WISE.W2"] = (
-            float(vizier_result["W2mag"]),
-            float(vizier_result["e_W4mag"]),
+            float(vizier_wise["W2mag"]),
+            float(vizier_wise["e_W4mag"]),
         )
+
         target_dict["WISE/WISE.W3"] = (
-            float(vizier_result["W3mag"]),
-            float(vizier_result["e_W4mag"]),
+            float(vizier_wise["W3mag"]),
+            float(vizier_wise["e_W4mag"]),
         )
+
         target_dict["WISE/WISE.W4"] = (
-            float(vizier_result["W4mag"]),
-            float(vizier_result["e_W4mag"]),
+            float(vizier_wise["W4mag"]),
+            float(vizier_wise["e_W4mag"]),
         )
 
         if write_json:
-            json_file = f"target_{self.gaia_release.lower()}_{self.gaia_source}.json"
-            print(f"\nStoring output: {json_file}")
+            json_file = (
+                f"target_{self.gaia_release.lower()}" f"_{self.gaia_source}.json"
+            )
+
+            print(f"\nStoring JSON output: {json_file}")
 
             with open(json_file, "w", encoding="utf-8") as open_file:
                 json.dump(target_dict, open_file, indent=4)
@@ -612,12 +706,12 @@ class CaliStar:
         Simbad.add_votable_fields(
             "sptype",
             "ids",
-            "flux(J)",
-            "flux(H)",
-            "flux(K)",
-            "flux_error(J)",
-            "flux_error(H)",
-            "flux_error(K)",
+            # "flux(J)",
+            # "flux(H)",
+            # "flux(K)",
+            # "flux_error(J)",
+            # "flux_error(H)",
+            # "flux_error(K)",
         )
 
         print(f"Radius of search cone = {search_radius} deg")
@@ -721,61 +815,85 @@ class CaliStar:
                 else:
                     cal_df.loc[gaia_item.index, "SpT"] = simbad_result["SP_TYPE"]
 
-                if np.ma.is_masked(simbad_result["FLUX_J"]):
-                    cal_df.loc[gaia_item.index, "2MASS/2MASS.J"] = np.nan
-                else:
-                    cal_df.loc[gaia_item.index, "2MASS/2MASS.J"] = simbad_result[
-                        "FLUX_J"
-                    ]
-
-                if np.ma.is_masked(simbad_result["FLUX_H"]):
-                    cal_df.loc[gaia_item.index, "2MASS/2MASS.H"] = np.nan
-                else:
-                    cal_df.loc[gaia_item.index, "2MASS/2MASS.H"] = simbad_result[
-                        "FLUX_H"
-                    ]
-
-                if np.ma.is_masked(simbad_result["FLUX_K"]):
-                    cal_df.loc[gaia_item.index, "2MASS/2MASS.Ks"] = np.nan
-                else:
-                    cal_df.loc[gaia_item.index, "2MASS/2MASS.Ks"] = simbad_result[
-                        "FLUX_K"
-                    ]
+                # if np.ma.is_masked(simbad_result["FLUX_J"]):
+                #     cal_df.loc[gaia_item.index, "2MASS/2MASS.J"] = np.nan
+                # else:
+                #     cal_df.loc[gaia_item.index, "2MASS/2MASS.J"] = simbad_result[
+                #         "FLUX_J"
+                #     ]
+                #
+                # if np.ma.is_masked(simbad_result["FLUX_H"]):
+                #     cal_df.loc[gaia_item.index, "2MASS/2MASS.H"] = np.nan
+                # else:
+                #     cal_df.loc[gaia_item.index, "2MASS/2MASS.H"] = simbad_result[
+                #         "FLUX_H"
+                #     ]
+                #
+                # if np.ma.is_masked(simbad_result["FLUX_K"]):
+                #     cal_df.loc[gaia_item.index, "2MASS/2MASS.Ks"] = np.nan
+                # else:
+                #     cal_df.loc[gaia_item.index, "2MASS/2MASS.Ks"] = simbad_result[
+                #         "FLUX_K"
+                #     ]
 
             radius = u.Quantity(1.0 * u.arcmin)
 
             vizier_result = vizier_obj.query_object(
                 f"GAIA {self.gaia_release} {gaia_item['source_id']}",
                 radius=radius,
-                catalog="II/328/allwise",
+                catalog=["II/246/out", "II/328/allwise"],
             )
 
-            if len(vizier_result) == 1:
-                vizier_result = vizier_result["II/328/allwise"][0]
+            if len(vizier_result) == 2:
+                # 2MASS
+                vizier_2mass = vizier_result["II/246/out"][0]
+
+                # Check if the separation between the Gaia and
+                # the 2MASS coordinates is at most 200 mas
+                skip_source = vizier_2mass["_r"] > 0.2
+
+                if skip_source or np.ma.is_masked(vizier_2mass["Jmag"]):
+                    cal_df.loc[gaia_item.index, "2MASS/2MASS.J"] = np.nan
+                else:
+                    cal_df.loc[gaia_item.index, "2MASS/2MASS.J"] = vizier_2mass["Jmag"]
+
+                if skip_source or np.ma.is_masked(vizier_2mass["Hmag"]):
+                    cal_df.loc[gaia_item.index, "2MASS/2MASS.H"] = np.nan
+                else:
+                    cal_df.loc[gaia_item.index, "2MASS/2MASS.H"] = vizier_2mass["Hmag"]
+
+                if skip_source or np.ma.is_masked(vizier_2mass["Kmag"]):
+                    cal_df.loc[gaia_item.index, "2MASS/2MASS.Ks"] = np.nan
+                else:
+                    cal_df.loc[gaia_item.index, "2MASS/2MASS.Ks"] = vizier_2mass["Kmag"]
+
+                # WISE
+
+                vizier_wise = vizier_result["II/328/allwise"][0]
 
                 # Check if the separation between the Gaia and
                 # the ALLWISE coordinates is at most 200 mas
-                skip_source = vizier_result["_r"] > 0.2
+                skip_source = vizier_wise["_r"] > 0.2
 
-                if skip_source or np.ma.is_masked(vizier_result["W1mag"]):
+                if skip_source or np.ma.is_masked(vizier_wise["W1mag"]):
                     cal_df.loc[gaia_item.index, "WISE/WISE.W1"] = np.nan
                 else:
-                    cal_df.loc[gaia_item.index, "WISE/WISE.W1"] = vizier_result["W1mag"]
+                    cal_df.loc[gaia_item.index, "WISE/WISE.W1"] = vizier_wise["W1mag"]
 
-                if skip_source or np.ma.is_masked(vizier_result["W2mag"]):
+                if skip_source or np.ma.is_masked(vizier_wise["W2mag"]):
                     cal_df.loc[gaia_item.index, "WISE/WISE.W2"] = np.nan
                 else:
-                    cal_df.loc[gaia_item.index, "WISE/WISE.W2"] = vizier_result["W2mag"]
+                    cal_df.loc[gaia_item.index, "WISE/WISE.W2"] = vizier_wise["W2mag"]
 
-                if skip_source or np.ma.is_masked(vizier_result["W3mag"]):
+                if skip_source or np.ma.is_masked(vizier_wise["W3mag"]):
                     cal_df.loc[gaia_item.index, "WISE/WISE.W3"] = np.nan
                 else:
-                    cal_df.loc[gaia_item.index, "WISE/WISE.W3"] = vizier_result["W3mag"]
+                    cal_df.loc[gaia_item.index, "WISE/WISE.W3"] = vizier_wise["W3mag"]
 
-                if skip_source or np.ma.is_masked(vizier_result["W4mag"]):
+                if skip_source or np.ma.is_masked(vizier_wise["W4mag"]):
                     cal_df.loc[gaia_item.index, "WISE/WISE.W4"] = np.nan
                 else:
-                    cal_df.loc[gaia_item.index, "WISE/WISE.W4"] = vizier_result["W4mag"]
+                    cal_df.loc[gaia_item.index, "WISE/WISE.W4"] = vizier_wise["W4mag"]
 
                 # This query returns no sources?
                 # gaia_query = f"""
