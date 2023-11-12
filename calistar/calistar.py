@@ -432,7 +432,7 @@ class CaliStar:
                 password=None,
             )
 
-            xp_plot = f"{self.gaia_source}_gaiaxp"
+            xp_plot = f"gaiaxp_{self.gaia_source}"
             print(f"\nStoring Gaia XP plot: {xp_plot}_0.jpg")
 
             plot_spectra(
@@ -451,7 +451,7 @@ class CaliStar:
             xp_error = 1e3 * df_cal["flux_error"].to_numpy()[0]
 
             header = "Wavelength (um) - Flux (W m-2 um-1) - Uncertainty (W m-2 um-1)"
-            xp_file = f"{self.gaia_source}_gaiaxp_spec.dat"
+            xp_file = f"gaiaxp_{self.gaia_source}.dat"
             xp_spec = np.column_stack([xp_wavel, xp_flux, xp_error])
             np.savetxt(xp_file, xp_spec, header=header)
             print(f"Storing Gaia XP spectrum: {xp_file}")
