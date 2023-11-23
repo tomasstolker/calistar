@@ -169,6 +169,7 @@ class CaliStar:
     def target_star(
         self,
         write_json: bool = True,
+        get_gaiaxp: bool = True,
     ) -> Dict[str, Union[str, float]]:
         """
         Function for retrieving the the astrometric and
@@ -184,6 +185,11 @@ class CaliStar:
             The file will be stored in the working folder and starts
             with ``target_``. The filename contains also the Gaia
             release and the Gaia source ID of the target.
+        get_gaiaxp : bool
+            Retrieve the Gaia XP spectrum if available (default: True).
+            If set to ``True``, the spectrum will be written to a data
+            file and a plot will also be created. The spectrum is not
+            retrieved when the argument is set to ``False``.
 
         Returns
         -------
@@ -414,7 +420,7 @@ class CaliStar:
 
         # Gaia XP spectrum
 
-        if (
+        if get_gaiaxp and (
             "has_xp_continuous" in gaia_result.columns
             and gaia_result["has_xp_continuous"][0]
         ):
@@ -454,7 +460,7 @@ class CaliStar:
             xp_file = f"gaiaxp_{self.gaia_source}.dat"
             xp_spec = np.column_stack([xp_wavel, xp_flux, xp_error])
             np.savetxt(xp_file, xp_spec, header=header)
-            print(f"Storing Gaia XP spectrum: {xp_file}")
+            print(f"Storing Gaia XP data: {xp_file}")
 
         # Add spectral type to the Simbad output
 
