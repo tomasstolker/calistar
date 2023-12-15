@@ -7,7 +7,7 @@
 .. image:: https://img.shields.io/pypi/pyversions/calistar
    :target: https://pypi.python.org/pypi/calistar
 
-.. image:: https://github.com/tomasstolker/calistar/workflows/CI/badge.svg?branch=main
+.. image:: https://github.com/tomasstolker/calistar/actions/workflows/main.yml/badge.svg
    :target: https://github.com/tomasstolker/calistar/actions
 
 .. image:: https://img.shields.io/readthedocs/calistar
