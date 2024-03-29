@@ -258,7 +258,14 @@ class CaliStar:
 
         mag_rp_error = np.sqrt(mag_rp_error**2 + gaia_rp_zp[1] ** 2)
 
-        target_dict["Gaia ID"] = int(gaia_result["source_id"][0])
+        if "SOURCE_ID" in gaia_result.columns:
+            gaia_source_id = int(gaia_result["SOURCE_ID"][0])
+        elif "source_id" in gaia_result.columns:
+            gaia_source_id = int(gaia_result["source_id"][0])
+        else:
+            raise ValueError(f"Gaia source ID not found in {gaia_result}")
+
+        target_dict["Gaia ID"] = gaia_source_id
 
         target_dict["Gaia release"] = self.gaia_release
 
@@ -328,14 +335,13 @@ class CaliStar:
             "hmsdms", alwayssign=True, precision=2, pad=True
         )
 
-        if self.gaia_source != gaia_result["source_id"][0]:
+        if self.gaia_source != gaia_source_id:
             raise ValueError(
-                f"The requested source ID ({self.gaia_source}) "
-                "is not equal to the retrieved source ID "
-                f"({gaia_result['source_id'][0]})."
+                f"The requested source ID ({self.gaia_source}) is not "
+                f"equal to the retrieved source ID ({gaia_source_id})."
             )
 
-        print(f"\nGAIA {self.gaia_release} source ID = {gaia_result['source_id'][0]}")
+        print(f"\nGAIA {self.gaia_release} source ID = {gaia_source_id}")
         print(f"Reference epoch = {gaia_result['ref_epoch'][0]}")
 
         print(
@@ -780,7 +786,14 @@ class CaliStar:
         vizier_obj = Vizier(columns=["*", "+_r"])
 
         for gaia_item in track(gaia_results, description="Processing..."):
-            cal_df.loc[gaia_item.index, "Gaia ID"] = gaia_item["source_id"]
+            if "SOURCE_ID" in gaia_item.columns:
+                gaia_source_id = int(gaia_item["SOURCE_ID"])
+            elif "source_id" in gaia_item.columns:
+                gaia_source_id = int(gaia_item["source_id"])
+            else:
+                raise ValueError(f"Gaia source ID not found in {gaia_item}")
+
+            cal_df.loc[gaia_item.index, "Gaia ID"] = gaia_source_id
 
             coord_target = SkyCoord(
                 target_dict["Gaia RA"][0],
@@ -805,7 +818,7 @@ class CaliStar:
             ]
 
             simbad_result = Simbad.query_object(
-                f"GAIA {self.gaia_release} {gaia_item['source_id']}"
+                f"GAIA {self.gaia_release} {gaia_source_id}"
             )
 
             if simbad_result is not None:
@@ -845,7 +858,7 @@ class CaliStar:
             radius = u.Quantity(1.0 * u.arcmin)
 
             vizier_result = vizier_obj.query_object(
-                f"GAIA {self.gaia_release} {gaia_item['source_id']}",
+                f"GAIA {self.gaia_release} {gaia_source_id}",
                 radius=radius,
                 catalog=["II/246/out", "II/328/allwise"],
             )
