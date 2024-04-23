@@ -170,6 +170,7 @@ class CaliStar:
         self,
         write_json: bool = True,
         get_gaiaxp: bool = True,
+        allwise_catalog: bool = True,
     ) -> Dict[str, Union[str, float]]:
         """
         Function for retrieving the the astrometric and
@@ -190,6 +191,10 @@ class CaliStar:
             If set to ``True``, the spectrum will be written to a data
             file and a plot will also be created. The spectrum is not
             retrieved when the argument is set to ``False``.
+        allwise_catalog : bool
+            Select the WISE magnitudes from the ALLWISE catalog if set
+            to ``True`` or select the magnitudes from the earlier WISE
+            catalog if set to ``False``.
 
         Returns
         -------
@@ -536,7 +541,7 @@ class CaliStar:
         print("\n-> Querying VizieR...\n")
 
         vizier_obj = Vizier(
-            columns=["*", "+_r"], catalog=["II/246/out", "II/328/allwise"]
+            columns=["*", "+_r"], catalog=["II/246/out", "II/328/allwise", "II/311/wise"]
         )
 
         radius = u.Quantity(1.0 * u.arcmin)
@@ -587,13 +592,21 @@ class CaliStar:
 
         # WISE data from VizieR
 
-        vizier_wise = vizier_result["II/328/allwise"]
+        if allwise_catalog:
+            vizier_wise = vizier_result["II/328/allwise"]
+        else:
+            vizier_wise = vizier_result["II/311/wise"]
+
         vizier_wise = vizier_wise[0]
 
-        print(f"\nALLWISE source ID = {vizier_wise['AllWISE']}")
+        if allwise_catalog:
+            print(f"\nALLWISE source ID = {vizier_wise['AllWISE']}")
+        else:
+            print(vizier_wise.columns)
+            print(f"\nWISE source ID = {vizier_wise['WISE']}")
 
         print(
-            f"Separation between Gaia and ALLWISE source = "
+            f"Separation between Gaia and WISE source = "
             f"{1e3*vizier_wise['_r']:.1f} mas"
         )
 
