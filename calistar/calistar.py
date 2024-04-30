@@ -32,9 +32,6 @@ import calistar
 # No limit on the number of rows with a Gaia query
 Gaia.ROW_LIMIT = -1
 
-# Only return the nearest source with a Vizier query
-Vizier.ROW_LIMIT = 1
-
 
 class CaliStar:
     """
@@ -306,26 +303,26 @@ class CaliStar:
             mag_g_error,
         )
 
-        target_dict[f"GAIA/GAIA{self.gaia_idx}.Gbp"] = (
-            float(gaia_result["phot_bp_mean_mag"][0]),
-            mag_bp_error,
-        )
+        if "phot_bp_mean_mag" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["phot_bp_mean_mag"][0]):
+                target_dict[f"GAIA/GAIA{self.gaia_idx}.Gbp"] = (
+                    float(gaia_result["phot_bp_mean_mag"][0]),
+                    mag_bp_error,
+                )
 
-        target_dict[f"GAIA/GAIA{self.gaia_idx}.Grp"] = (
-            float(gaia_result["phot_rp_mean_mag"][0]),
-            mag_rp_error,
-        )
-
-        target_dict[f"GAIA/GAIA{self.gaia_idx}.Grp"] = (
-            float(gaia_result["phot_rp_mean_mag"][0]),
-            mag_rp_error,
-        )
+        if "phot_rp_mean_mag" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["phot_rp_mean_mag"][0]):
+                target_dict[f"GAIA/GAIA{self.gaia_idx}.Grp"] = (
+                    float(gaia_result["phot_rp_mean_mag"][0]),
+                    mag_rp_error,
+                )
 
         if "grvs_mag" in gaia_result.columns:
-            target_dict[f"GAIA/GAIA{self.gaia_idx}.Grvs"] = (
-                float(gaia_result["grvs_mag"][0]),
-                float(gaia_result["grvs_mag_error"][0]),
-            )
+            if not np.ma.is_masked(gaia_result["grvs_mag"][0]):
+                target_dict[f"GAIA/GAIA{self.gaia_idx}.Grvs"] = (
+                    float(gaia_result["grvs_mag"][0]),
+                    float(gaia_result["grvs_mag_error"][0]),
+                )
 
         # Create SkyCoord object from the RA and Dec of the selected Gaia source ID
 
@@ -372,37 +369,44 @@ class CaliStar:
             f"+/- {gaia_result['pmdec_error'][0]:.2f} mas/yr"
         )
 
-        if "radial_velocity" in gaia_result.columns and not np.ma.is_masked(
-            gaia_result["radial_velocity"]
-        ):
-            print(
-                f"Radial velocity = {gaia_result['radial_velocity'][0]:.2f} "
-                f"+/- {gaia_result['radial_velocity_error'][0]:.2f} km/s"
-            )
+        if "radial_velocity" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["radial_velocity"]):
+                print(
+                    f"Radial velocity = {gaia_result['radial_velocity'][0]:.2f} "
+                    f"+/- {gaia_result['radial_velocity_error'][0]:.2f} km/s"
+                )
 
         print(
             f"\nG mag = {gaia_result['phot_g_mean_mag'][0]:.6f} +/- {mag_g_error:.6f}"
         )
-        print(
-            f"BP mag = {gaia_result['phot_bp_mean_mag'][0]:.6f} +/- {mag_bp_error:.6f}"
-        )
-        print(
-            f"RP mag = {gaia_result['phot_rp_mean_mag'][0]:.6f} +/- {mag_rp_error:.6f}"
-        )
+
+        if "phot_bp_mean_mag" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["phot_bp_mean_mag"][0]):
+                print(
+                    f"BP mag = {gaia_result['phot_bp_mean_mag'][0]:.6f} +/- {mag_bp_error:.6f}"
+                )
+
+        if "phot_rp_mean_mag" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["phot_rp_mean_mag"][0]):
+                print(
+                    f"RP mag = {gaia_result['phot_rp_mean_mag'][0]:.6f} +/- {mag_rp_error:.6f}"
+                )
 
         if "grvs_mag" in gaia_result.columns:
-            print(
-                f"GRVS mag = {gaia_result['grvs_mag'][0]:.6f} "
-                f"+/- {gaia_result['grvs_mag_error'][0]:.6f}"
-            )
+            if not np.ma.is_masked(gaia_result["grvs_mag"][0]):
+                print(
+                    f"GRVS mag = {gaia_result['grvs_mag'][0]:.6f} "
+                    f"+/- {gaia_result['grvs_mag_error'][0]:.6f}"
+                )
 
-        if "teff_gspphot" in gaia_result.columns and not np.ma.is_masked(
-            gaia_result["teff_gspphot"]
-        ):
-            print(f"\nEffective temperature = {gaia_result['teff_gspphot'][0]:.0f} K")
-            print(f"Surface gravity = {gaia_result['logg_gspphot'][0]:.2f}")
-            print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
-            print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
+        if "teff_gspphot" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["teff_gspphot"]):
+                print(
+                    f"\nEffective temperature = {gaia_result['teff_gspphot'][0]:.0f} K"
+                )
+                print(f"Surface gravity = {gaia_result['logg_gspphot'][0]:.2f}")
+                print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
+                print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
 
         print(
             f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
@@ -479,6 +483,7 @@ class CaliStar:
 
         Simbad.add_votable_fields(
             "sptype",
+            "ids",
             # "flux(J)",
             # "flux(H)",
             # "flux(K)",
@@ -490,50 +495,54 @@ class CaliStar:
         # Simbad query for selected Gaia source ID
 
         print("\n-> Querying Simbad...\n")
+
         simbad_result = Simbad.query_object(
             f"GAIA {self.gaia_release} {self.gaia_source}"
         )
-        simbad_result = simbad_result[0]
 
-        # print(simbad_result.columns)
+        if simbad_result is not None:
+            simbad_result = simbad_result[0]
 
-        print(f"Simbad ID = {simbad_result['MAIN_ID']}")
+            print(f"Simbad ID = {simbad_result['MAIN_ID']}")
 
-        print(f"Spectral type = {simbad_result['SP_TYPE']}")
+            print(f"Spectral type = {simbad_result['SP_TYPE']}")
 
-        # print(
-        #     f"\n2MASS J mag = {simbad_result['FLUX_J']:.3f} "
-        #     f"+/- {simbad_result['FLUX_ERROR_J']:.3f}"
-        # )
-        #
-        # print(
-        #     f"2MASS H mag = {simbad_result['FLUX_H']:.3f} "
-        #     f"+/- {simbad_result['FLUX_ERROR_H']:.3f}"
-        # )
-        #
-        # print(
-        #     f"2MASS Ks mag = {simbad_result['FLUX_K']:.3f} "
-        #     f"+/- {simbad_result['FLUX_ERROR_K']:.3f}"
-        # )
+            target_dict["Simbad ID"] = simbad_result["MAIN_ID"]
 
-        target_dict["Simbad ID"] = simbad_result["MAIN_ID"]
+            target_dict["SpT"] = simbad_result["SP_TYPE"]
 
-        target_dict["SpT"] = simbad_result["SP_TYPE"]
+            # print(
+            #     f"\n2MASS J mag = {simbad_result['FLUX_J']:.3f} "
+            #     f"+/- {simbad_result['FLUX_ERROR_J']:.3f}"
+            # )
+            #
+            # print(
+            #     f"2MASS H mag = {simbad_result['FLUX_H']:.3f} "
+            #     f"+/- {simbad_result['FLUX_ERROR_H']:.3f}"
+            # )
+            #
+            # print(
+            #     f"2MASS Ks mag = {simbad_result['FLUX_K']:.3f} "
+            #     f"+/- {simbad_result['FLUX_ERROR_K']:.3f}"
+            # )
 
-        # target_dict["2MASS/2MASS.J"] = (
-        #     float(simbad_result["FLUX_J"]),
-        #     float(simbad_result["FLUX_ERROR_J"]),
-        # )
-        #
-        # target_dict["2MASS/2MASS.H"] = (
-        #     float(simbad_result["FLUX_H"]),
-        #     float(simbad_result["FLUX_ERROR_H"]),
-        # )
-        #
-        # target_dict["2MASS/2MASS.Ks"] = (
-        #     float(simbad_result["FLUX_K"]),
-        #     float(simbad_result["FLUX_ERROR_K"]),
-        # )
+            # target_dict["2MASS/2MASS.J"] = (
+            #     float(simbad_result["FLUX_J"]),
+            #     float(simbad_result["FLUX_ERROR_J"]),
+            # )
+            #
+            # target_dict["2MASS/2MASS.H"] = (
+            #     float(simbad_result["FLUX_H"]),
+            #     float(simbad_result["FLUX_ERROR_H"]),
+            # )
+            #
+            # target_dict["2MASS/2MASS.Ks"] = (
+            #     float(simbad_result["FLUX_K"]),
+            #     float(simbad_result["FLUX_ERROR_K"]),
+            # )
+
+        else:
+            print("\nTarget not found on Simbad")
 
         # VizieR query for the selected Gaia source ID
         # Sort the result by distance from the queried object
@@ -541,7 +550,10 @@ class CaliStar:
         print("\n-> Querying VizieR...\n")
 
         vizier_obj = Vizier(
-            columns=["*", "+_r"], catalog=["II/246/out", "II/328/allwise", "II/311/wise"]
+            columns=["*", "+_r"],
+            catalog=["II/246/out", "II/328/allwise", "II/311/wise"],
+            timeout=10.0,
+            row_limit=1,
         )
 
         radius = u.Quantity(1.0 * u.arcmin)
@@ -553,42 +565,61 @@ class CaliStar:
         # 2MASS data from VizieR
 
         vizier_2mass = vizier_result["II/246/out"]
-        vizier_2mass = vizier_2mass[0]
 
-        print(f"2MASS source ID = {vizier_2mass['_2MASS']}")
+        if vizier_2mass is not None:
+            vizier_2mass = vizier_2mass[0]
 
-        print(
-            f"Separation between Gaia and 2MASS source = "
-            f"{1e3*vizier_2mass['_r']:.1f} mas"
-        )
+            print(f"2MASS source ID = {vizier_2mass['_2MASS']}")
 
-        print(
-            f"\n2MASS J mag = {vizier_2mass['Jmag']:.3f} "
-            f"+/- {vizier_2mass['e_Jmag']:.3f}"
-        )
+            print(
+                f"Separation between Gaia and 2MASS source = "
+                f"{1e3*vizier_2mass['_r']:.1f} mas"
+            )
 
-        print(
-            f"2MASS H mag = {vizier_2mass['Hmag']:.3f} "
-            f"+/- {vizier_2mass['e_Hmag']:.3f}"
-        )
+            if np.ma.is_masked(vizier_2mass["e_Jmag"]):
+                print(f"\n2MASS J mag = >{vizier_2mass['Jmag']:.3f}")
 
-        print(
-            f"2MASS Ks mag = {vizier_2mass['Kmag']:.3f} "
-            f"+/- {vizier_2mass['e_Kmag']:.3f}"
-        )
+            else:
+                print(
+                    f"\n2MASS J mag = {vizier_2mass['Jmag']:.3f} "
+                    f"+/- {vizier_2mass['e_Jmag']:.3f}"
+                )
 
-        target_dict["2MASS/2MASS.J"] = (
-            float(vizier_2mass["Jmag"]),
-            float(vizier_2mass["e_Jmag"]),
-        )
-        target_dict["2MASS/2MASS.H"] = (
-            float(vizier_2mass["Hmag"]),
-            float(vizier_2mass["e_Hmag"]),
-        )
-        target_dict["2MASS/2MASS.Ks"] = (
-            float(vizier_2mass["Kmag"]),
-            float(vizier_2mass["e_Kmag"]),
-        )
+                target_dict["2MASS/2MASS.J"] = (
+                    float(vizier_2mass["Jmag"]),
+                    float(vizier_2mass["e_Jmag"]),
+                )
+
+            if np.ma.is_masked(vizier_2mass["e_Hmag"]):
+                print(f"2MASS H mag = >{vizier_2mass['Hmag']:.3f}")
+
+            else:
+                print(
+                    f"2MASS H mag = {vizier_2mass['Hmag']:.3f} "
+                    f"+/- {vizier_2mass['e_Hmag']:.3f}"
+                )
+
+                target_dict["2MASS/2MASS.H"] = (
+                    float(vizier_2mass["Hmag"]),
+                    float(vizier_2mass["e_Hmag"]),
+                )
+
+            if np.ma.is_masked(vizier_2mass["e_Kmag"]):
+                print(f"2MASS Ks mag = >{vizier_2mass['Kmag']:.3f}")
+
+            else:
+                print(
+                    f"2MASS Ks mag = {vizier_2mass['Kmag']:.3f} "
+                    f"+/- {vizier_2mass['e_Kmag']:.3f}"
+                )
+
+                target_dict["2MASS/2MASS.Ks"] = (
+                    float(vizier_2mass["Kmag"]),
+                    float(vizier_2mass["e_Kmag"]),
+                )
+
+        else:
+            print("Target not found in 2MASS catalog")
 
         # WISE data from VizieR
 
@@ -597,63 +628,124 @@ class CaliStar:
         else:
             vizier_wise = vizier_result["II/311/wise"]
 
-        vizier_wise = vizier_wise[0]
+        if vizier_wise is not None:
+            vizier_wise = vizier_wise[0]
 
-        if allwise_catalog:
-            print(f"\nALLWISE source ID = {vizier_wise['AllWISE']}")
+            if allwise_catalog:
+                print(f"\nALLWISE source ID = {vizier_wise['AllWISE']}")
+            else:
+                print(f"\nWISE source ID = {vizier_wise['WISE']}")
+
+            print(
+                f"Separation between Gaia and WISE source = "
+                f"{1e3*vizier_wise['_r']:.1f} mas"
+            )
+
+            if np.ma.is_masked(vizier_wise["e_W1mag"]):
+                print(f"\nWISE W1 mag = >{vizier_wise['W1mag']:.3f}")
+
+            else:
+                print(
+                    f"\nWISE W1 mag = {vizier_wise['W1mag']:.3f} "
+                    f"+/- {vizier_wise['e_W1mag']:.3f}"
+                )
+
+                target_dict["WISE/WISE.W1"] = (
+                    float(vizier_wise["W1mag"]),
+                    float(vizier_wise["e_W1mag"]),
+                )
+
+            if np.ma.is_masked(vizier_wise["e_W2mag"]):
+                print(f"WISE W2 mag = >{vizier_wise['W2mag']:.3f}")
+
+            else:
+                print(
+                    f"WISE W2 mag = {vizier_wise['W2mag']:.3f} "
+                    f"+/- {vizier_wise['e_W2mag']:.3f}"
+                )
+
+                target_dict["WISE/WISE.W2"] = (
+                    float(vizier_wise["W2mag"]),
+                    float(vizier_wise["e_W2mag"]),
+                )
+
+            if np.ma.is_masked(vizier_wise["e_W3mag"]):
+                print(f"WISE W3 mag = >{vizier_wise['W3mag']:.3f}")
+
+            else:
+                print(
+                    f"WISE W3 mag = {vizier_wise['W3mag']:.3f} "
+                    f"+/- {vizier_wise['e_W3mag']:.3f}"
+                )
+
+                target_dict["WISE/WISE.W3"] = (
+                    float(vizier_wise["W3mag"]),
+                    float(vizier_wise["e_W3mag"]),
+                )
+
+            if np.ma.is_masked(vizier_wise["e_W4mag"]):
+                print(f"WISE W4 mag = >{vizier_wise['W4mag']:.3f}")
+
+            else:
+                print(
+                    f"WISE W4 mag = {vizier_wise['W4mag']:.3f} "
+                    f"+/- {vizier_wise['e_W4mag']:.3f}"
+                )
+
+                target_dict["WISE/WISE.W4"] = (
+                    float(vizier_wise["W4mag"]),
+                    float(vizier_wise["e_W4mag"]),
+                )
+
         else:
-            print(vizier_wise.columns)
-            print(f"\nWISE source ID = {vizier_wise['WISE']}")
+            print("Target not found in WISE catalog")
 
-        print(
-            f"Separation between Gaia and WISE source = "
-            f"{1e3*vizier_wise['_r']:.1f} mas"
-        )
+        # write_json = False
 
-        print(
-            f"\nWISE W1 mag = {vizier_wise['W1mag']:.3f} "
-            f"+/- {vizier_wise['e_W1mag']:.3f}"
-        )
+        print("\n-> Querying Washington Double Star catalog...\n")
 
-        print(
-            f"WISE W2 mag = {vizier_wise['W2mag']:.3f} "
-            f"+/- {vizier_wise['e_W2mag']:.3f}"
-        )
+        if simbad_result is not None:
+            simbad_ids = simbad_result["IDS"].split("|")
+            wds_id = list(filter(lambda x: x.startswith("WDS"), simbad_ids))
 
-        print(
-            f"WISE W3 mag = {vizier_wise['W3mag']:.3f} "
-            f"+/- {vizier_wise['e_W3mag']:.3f}"
-        )
+            if len(wds_id) == 1:
+                wds_table = Table.read(self.wds_file, path="wds_catalog")
+                # print(wds_table.columns)
 
-        print(
-            f"WISE W4 mag = {vizier_wise['W4mag']:.3f} "
-            f"+/- {vizier_wise['e_W4mag']:.3f}"
-        )
+                id_crop = wds_id[0].split(" ")[-1][1:11]
+                id_idx = np.where(id_crop == wds_table["WDS"])[0]
 
-        target_dict["WISE/WISE.W1"] = (
-            float(vizier_wise["W1mag"]),
-            float(vizier_wise["e_W4mag"]),
-        )
+                target_dict["WDS ID"] = wds_id[0]
 
-        target_dict["WISE/WISE.W2"] = (
-            float(vizier_wise["W2mag"]),
-            float(vizier_wise["e_W4mag"]),
-        )
+                for wds_idx in range(len(id_idx)):
+                    if wds_idx > 0:
+                        print()
 
-        target_dict["WISE/WISE.W3"] = (
-            float(vizier_wise["W3mag"]),
-            float(vizier_wise["e_W4mag"]),
-        )
+                    wds_select = wds_table[id_idx[wds_idx]]
+                    print(f"WDS ID = {wds_select['WDS']}")
 
-        target_dict["WISE/WISE.W4"] = (
-            float(vizier_wise["W4mag"]),
-            float(vizier_wise["e_W4mag"]),
-        )
+                    if len(wds_select["Comp"]) > 0:
+                        print(f"Companion = {wds_select['Comp']}")
+
+                    print(f"Observation 1 = {wds_select['Obs1']}")
+                    print(f"Observation 2 = {wds_select['Obs2']}")
+                    print(f"Separation 1 (arcsec) = {wds_select['sep1']:.2f}")
+                    print(f"Separation 2 (arcsec) = {wds_select['sep2']:.2f}")
+                    print(f"Position angle 1 (deg) = {wds_select['pa1']:.2f}")
+                    print(f"Position angle 2 (deg) = {wds_select['pa2']:.2f}")
+                    print(f"Magnitude 1 = {wds_select['mag1']:.2f}")
+                    print(f"Magnitude 2 = {wds_select['mag2']:.2f}")
+
+                # write_json = True
+
+            if len(wds_id) == 0 or len(id_idx) == 0:
+                print("Target not found in WDS catalog")
+
+        else:
+            print("Target not found in WDS catalog")
 
         if write_json:
-            json_file = (
-                f"target_{self.gaia_release.lower()}" f"_{self.gaia_source}.json"
-            )
+            json_file = f"target_{self.gaia_release.lower()}_{self.gaia_source}.json"
 
             print(f"\nStoring JSON output: {json_file}")
 
@@ -796,7 +888,7 @@ class CaliStar:
 
         warnings.filterwarnings("ignore", category=UserWarning)
 
-        vizier_obj = Vizier(columns=["*", "+_r"])
+        vizier_obj = Vizier(columns=["*", "+_r"], timeout=10.0, row_limit=1)
 
         for gaia_item in track(gaia_results, description="Processing..."):
             if "SOURCE_ID" in gaia_item.columns:

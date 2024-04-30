@@ -16,12 +16,16 @@ class TestCaliStar:
 
     def test_target_star(self) -> None:
 
-        self.cal_star.target_star()
+        self.cal_star.target_star(
+            write_json=True, get_gaiaxp=True, allwise_catalog=True
+        )
 
     def test_find_calib(self) -> None:
 
-        self.cal_star.find_calib(search_radius=1.)
+        self.cal_star.find_calib(search_radius=1.0, g_mag_range=None, write_csv=True)
 
     def test_select_calib(self) -> None:
 
-        self.cal_star.select_calib(filter_names=["2MASS/2MASS.H"], mag_diff=5.)
+        self.cal_star.select_calib(
+            filter_names=["2MASS/2MASS.H"], mag_diff=5.0, write_csv=True
+        )
