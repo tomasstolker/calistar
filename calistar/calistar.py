@@ -413,16 +413,19 @@ class CaliStar:
         )
 
         if "ruwe" in gaia_result.columns:
-            print(f"RUWE = {gaia_result['ruwe'][0]:.2f}")
+            if not np.ma.is_masked(gaia_result["ruwe"]):
+                print(f"RUWE = {gaia_result['ruwe'][0]:.2f}")
 
         if "non_single_star" in gaia_result.columns:
-            print(f"Non single star = {gaia_result['non_single_star'][0]}")
+            if not np.ma.is_masked(gaia_result["non_single_star"]):
+                print(f"Non single star = {gaia_result['non_single_star'][0]}")
 
         if "classprob_dsc_combmod_star" in gaia_result.columns:
-            print(
-                "Single star probability from DSC-Combmod = "
-                f"{gaia_result['classprob_dsc_combmod_star'][0]:.2f}"
-            )
+            if not np.ma.is_masked(gaia_result["classprob_dsc_combmod_star"]):
+                print(
+                    "Single star probability from DSC-Combmod = "
+                    f"{gaia_result['classprob_dsc_combmod_star'][0]:.2f}"
+                )
 
         if "has_xp_continuous" in gaia_result.columns:
             print(f"\nXP continuous = {gaia_result['has_xp_continuous'][0]}")
@@ -577,7 +580,8 @@ class CaliStar:
             )
 
             if np.ma.is_masked(vizier_2mass["e_Jmag"]):
-                print(f"\n2MASS J mag = >{vizier_2mass['Jmag']:.3f}")
+                if not np.ma.is_masked(vizier_2mass["Jmag"]):
+                    print(f"\n2MASS J mag = >{vizier_2mass['Jmag']:.3f}")
 
             else:
                 print(
@@ -591,7 +595,8 @@ class CaliStar:
                 )
 
             if np.ma.is_masked(vizier_2mass["e_Hmag"]):
-                print(f"2MASS H mag = >{vizier_2mass['Hmag']:.3f}")
+                if not np.ma.is_masked(vizier_2mass["Hmag"]):
+                    print(f"2MASS H mag = >{vizier_2mass['Hmag']:.3f}")
 
             else:
                 print(
@@ -605,7 +610,8 @@ class CaliStar:
                 )
 
             if np.ma.is_masked(vizier_2mass["e_Kmag"]):
-                print(f"2MASS Ks mag = >{vizier_2mass['Kmag']:.3f}")
+                if not np.ma.is_masked(vizier_2mass["Kmag"]):
+                    print(f"2MASS Ks mag = >{vizier_2mass['Kmag']:.3f}")
 
             else:
                 print(
@@ -642,7 +648,8 @@ class CaliStar:
             )
 
             if np.ma.is_masked(vizier_wise["e_W1mag"]):
-                print(f"\nWISE W1 mag = >{vizier_wise['W1mag']:.3f}")
+                if not np.ma.is_masked(vizier_wise["W1mag"]):
+                    print(f"\nWISE W1 mag = >{vizier_wise['W1mag']:.3f}")
 
             else:
                 print(
@@ -656,7 +663,8 @@ class CaliStar:
                 )
 
             if np.ma.is_masked(vizier_wise["e_W2mag"]):
-                print(f"WISE W2 mag = >{vizier_wise['W2mag']:.3f}")
+                if not np.ma.is_masked(vizier_wise["W2mag"]):
+                    print(f"WISE W2 mag = >{vizier_wise['W2mag']:.3f}")
 
             else:
                 print(
@@ -670,7 +678,8 @@ class CaliStar:
                 )
 
             if np.ma.is_masked(vizier_wise["e_W3mag"]):
-                print(f"WISE W3 mag = >{vizier_wise['W3mag']:.3f}")
+                if not np.ma.is_masked(vizier_wise["W3mag"]):
+                    print(f"WISE W3 mag = >{vizier_wise['W3mag']:.3f}")
 
             else:
                 print(
@@ -684,7 +693,8 @@ class CaliStar:
                 )
 
             if np.ma.is_masked(vizier_wise["e_W4mag"]):
-                print(f"WISE W4 mag = >{vizier_wise['W4mag']:.3f}")
+                if not np.ma.is_masked(vizier_wise["W4mag"]):
+                    print(f"WISE W4 mag = >{vizier_wise['W4mag']:.3f}")
 
             else:
                 print(
@@ -700,22 +710,27 @@ class CaliStar:
         else:
             print("Target not found in WISE catalog")
 
-        # write_json = False
-
         print("\n-> Querying Washington Double Star catalog...\n")
+
+        found_wds = False
 
         if simbad_result is not None:
             simbad_ids = simbad_result["IDS"].split("|")
             wds_id = list(filter(lambda x: x.startswith("WDS"), simbad_ids))
 
             if len(wds_id) == 1:
+                # There should be a single WDS identified per target on Simbad
+                wds_id = wds_id[0]
+
                 wds_table = Table.read(self.wds_file, path="wds_catalog")
                 # print(wds_table.columns)
 
-                id_crop = wds_id[0].split(" ")[-1][1:11]
+                # This will not always given the correct ID
+                # only for regular binary system IDs
+                id_crop = wds_id.split(" ")[-1][1:11]
                 id_idx = np.where(id_crop == wds_table["WDS"])[0]
 
-                target_dict["WDS ID"] = wds_id[0]
+                target_dict["WDS ID"] = wds_id
 
                 for wds_idx in range(len(id_idx)):
                     if wds_idx > 0:
@@ -736,12 +751,9 @@ class CaliStar:
                     print(f"Magnitude 1 = {wds_select['mag1']:.2f}")
                     print(f"Magnitude 2 = {wds_select['mag2']:.2f}")
 
-                # write_json = True
+                    found_wds = True
 
-            if len(wds_id) == 0 or len(id_idx) == 0:
-                print("Target not found in WDS catalog")
-
-        else:
+        if not found_wds:
             print("Target not found in WDS catalog")
 
         if write_json:

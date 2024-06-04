@@ -10,6 +10,13 @@ class TestCaliStar:
         self.test_dir = os.path.dirname(__file__) + "/"
         self.cal_star = calistar.CaliStar(gaia_source=6843672087120107264)
 
+    def teardown_class(self):
+        os.remove("calib_find_dr3_6843672087120107264.csv")
+        os.remove("calib_select_dr3_6843672087120107264.csv")
+        os.remove("gaiaxp_6843672087120107264.dat")
+        os.remove("gaiaxp_6843672087120107264.jpg")
+        os.remove("target_dr3_6843672087120107264.json")
+
     def test_calistar(self) -> None:
 
         assert isinstance(self.cal_star, calistar.calistar.CaliStar)
