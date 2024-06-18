@@ -298,16 +298,27 @@ class CaliStar:
             float(gaia_result["parallax_error"][0]),  # (mas)
         )
 
-        target_dict[f"GAIA/GAIA{self.gaia_idx}.G"] = (
-            float(gaia_result["phot_g_mean_mag"][0]),
-            mag_g_error,
-        )
+        if "phot_g_mean_mag" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["phot_g_mean_mag"][0]):
+                target_dict[f"GAIA/GAIA{self.gaia_idx}.G"] = (
+                    float(gaia_result["phot_g_mean_mag"][0]),
+                    mag_g_error,
+                )
+
+                print(
+                    f"\nG mag = {gaia_result['phot_g_mean_mag'][0]:.6f} +/- {mag_g_error:.6f}"
+                )
+
 
         if "phot_bp_mean_mag" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["phot_bp_mean_mag"][0]):
                 target_dict[f"GAIA/GAIA{self.gaia_idx}.Gbp"] = (
                     float(gaia_result["phot_bp_mean_mag"][0]),
                     mag_bp_error,
+                )
+
+                print(
+                    f"BP mag = {gaia_result['phot_bp_mean_mag'][0]:.6f} +/- {mag_bp_error:.6f}"
                 )
 
         if "phot_rp_mean_mag" in gaia_result.columns:
@@ -317,12 +328,22 @@ class CaliStar:
                     mag_rp_error,
                 )
 
+                print(
+                    f"RP mag = {gaia_result['phot_rp_mean_mag'][0]:.6f} +/- {mag_rp_error:.6f}"
+                )
+
         if "grvs_mag" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["grvs_mag"][0]):
                 target_dict[f"GAIA/GAIA{self.gaia_idx}.Grvs"] = (
                     float(gaia_result["grvs_mag"][0]),
                     float(gaia_result["grvs_mag_error"][0]),
                 )
+
+                print(
+                    f"GRVS mag = {gaia_result['grvs_mag'][0]:.6f} "
+                    f"+/- {gaia_result['grvs_mag_error'][0]:.6f}"
+                )
+
 
         # Create SkyCoord object from the RA and Dec of the selected Gaia source ID
 
@@ -376,29 +397,6 @@ class CaliStar:
                     f"+/- {gaia_result['radial_velocity_error'][0]:.2f} km/s"
                 )
 
-        print(
-            f"\nG mag = {gaia_result['phot_g_mean_mag'][0]:.6f} +/- {mag_g_error:.6f}"
-        )
-
-        if "phot_bp_mean_mag" in gaia_result.columns:
-            if not np.ma.is_masked(gaia_result["phot_bp_mean_mag"][0]):
-                print(
-                    f"BP mag = {gaia_result['phot_bp_mean_mag'][0]:.6f} +/- {mag_bp_error:.6f}"
-                )
-
-        if "phot_rp_mean_mag" in gaia_result.columns:
-            if not np.ma.is_masked(gaia_result["phot_rp_mean_mag"][0]):
-                print(
-                    f"RP mag = {gaia_result['phot_rp_mean_mag'][0]:.6f} +/- {mag_rp_error:.6f}"
-                )
-
-        if "grvs_mag" in gaia_result.columns:
-            if not np.ma.is_masked(gaia_result["grvs_mag"][0]):
-                print(
-                    f"GRVS mag = {gaia_result['grvs_mag'][0]:.6f} "
-                    f"+/- {gaia_result['grvs_mag_error'][0]:.6f}"
-                )
-
         if "teff_gspphot" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["teff_gspphot"]):
                 print(
@@ -407,6 +405,11 @@ class CaliStar:
                 print(f"Surface gravity = {gaia_result['logg_gspphot'][0]:.2f}")
                 print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
                 print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
+
+                target_dict["teff"] = float(gaia_result['teff_gspphot'][0])
+                target_dict["log(g)"] = float(gaia_result['logg_gspphot'][0])
+                target_dict["metallicity"] = float(gaia_result['mh_gspphot'][0])
+                target_dict["ag_ext"] = float(gaia_result['ag_gspphot'][0])
 
         print(
             f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
