@@ -570,7 +570,12 @@ class CaliStar:
 
         # 2MASS data from VizieR
 
-        vizier_2mass = vizier_result["II/246/out"]
+        print(vizier_result.keys())
+        print("II/246/out" in vizier_result.keys())
+        if "II/246/out" in vizier_result.keys():
+            vizier_2mass = vizier_result["II/246/out"]
+        else:
+            vizier_2mass = None
 
         if vizier_2mass is not None:
             vizier_2mass = vizier_2mass[0]
@@ -632,10 +637,14 @@ class CaliStar:
 
         # WISE data from VizieR
 
+        vizier_wise = None
+
         if allwise_catalog:
-            vizier_wise = vizier_result["II/328/allwise"]
+            if "II/328/allwise" in vizier_result.keys():
+                vizier_wise = vizier_result["II/328/allwise"]
         else:
-            vizier_wise = vizier_result["II/311/wise"]
+            if "II/311/wise" in vizier_result.keys():
+                vizier_wise = vizier_result["II/311/wise"]
 
         if vizier_wise is not None:
             vizier_wise = vizier_wise[0]
