@@ -9,8 +9,8 @@ with open("requirements.txt") as req_txt:
 
 setuptools.setup(
     name="calistar",
-    version="0.0.4",
-    description="Tool to search for a single calibration star",
+    version="0.0.5",
+    description="Tool to search for a calibration star",
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
     author="Tomas Stolker",
