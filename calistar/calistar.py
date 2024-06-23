@@ -556,8 +556,8 @@ class CaliStar:
         print("\n-> Querying VizieR...\n")
 
         vizier_obj = Vizier(
-            columns=["*", "+_r"],
-            catalog=["II/246/out", "II/328/allwise", "II/311/wise"],
+            columns=["*", "+_r", "BTmag", "e_BTmag", "VTmag", "e_VTmag"],
+            catalog=["I/259/tyc2", "II/246/out", "II/328/allwise", "II/311/wise"],
             timeout=10.0,
             row_limit=1,
         )
@@ -568,10 +568,58 @@ class CaliStar:
             f"GAIA {self.gaia_release} {self.gaia_source}", radius=radius
         )
 
+        # TYCHO data from VizieR
+
+        if "I/259/tyc2" in vizier_result.keys():
+            vizier_tycho = vizier_result["I/259/tyc2"]
+        else:
+            vizier_tycho = None
+
+        if vizier_tycho is not None:
+            vizier_tycho = vizier_tycho[0]
+
+            print(f"TYCHO source ID = {vizier_tycho['TYC1']}-{vizier_tycho['TYC2']}-{vizier_tycho['TYC3']}")
+
+            print(
+                f"Separation between Gaia and TYCHO source = "
+                f"{1e3*vizier_tycho['_r']:.1f} mas"
+            )
+
+            if np.ma.is_masked(vizier_tycho["e_BTmag"]):
+                if not np.ma.is_masked(vizier_tycho["BTmag"]):
+                    print(f"\nTYCHO BT mag = >{vizier_tycho['BTmag']:.3f}")
+
+            else:
+                print(
+                    f"\nTYCHO BT mag = {vizier_tycho['BTmag']:.3f} "
+                    f"+/- {vizier_tycho['e_BTmag']:.3f}"
+                )
+
+                target_dict["TYCHO/TYCHO.B"] = (
+                    float(vizier_tycho["BTmag"]),
+                    float(vizier_tycho["e_BTmag"]),
+                )
+
+            if np.ma.is_masked(vizier_tycho["e_VTmag"]):
+                if not np.ma.is_masked(vizier_tycho["VTmag"]):
+                    print(f"\nTYCHO VT mag = >{vizier_tycho['VTmag']:.3f}")
+
+            else:
+                print(
+                    f"TYCHO VT mag = {vizier_tycho['VTmag']:.3f} "
+                    f"+/- {vizier_tycho['e_VTmag']:.3f}"
+                )
+
+                target_dict["TYCHO/TYCHO.V"] = (
+                    float(vizier_tycho["VTmag"]),
+                    float(vizier_tycho["e_VTmag"]),
+                )
+
+        else:
+            print("Target not found in TYCHO catalog")
+
         # 2MASS data from VizieR
 
-        print(vizier_result.keys())
-        print("II/246/out" in vizier_result.keys())
         if "II/246/out" in vizier_result.keys():
             vizier_2mass = vizier_result["II/246/out"]
         else:
@@ -580,7 +628,7 @@ class CaliStar:
         if vizier_2mass is not None:
             vizier_2mass = vizier_2mass[0]
 
-            print(f"2MASS source ID = {vizier_2mass['_2MASS']}")
+            print(f"\n2MASS source ID = {vizier_2mass['_2MASS']}")
 
             print(
                 f"Separation between Gaia and 2MASS source = "

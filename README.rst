@@ -5,7 +5,7 @@
 
     |PyPI Status| |Python Versions| |CI Status| |Docs Status| |Code Coverage| |Code Quality| |License|
 
-*calistar* is a tool to search for a single calibration star. For example to be used for reference-star differential imaging or aperture masking interferometry. The package has been released on `PyPI <https://pypi.org/project/calistar/>`_ and is actively developed and maintained on Github.
+*calistar* is a tool to search for a calibration star. For example to be used for reference-star differential imaging or aperture masking interferometry. The package has been released on `PyPI <https://pypi.org/project/calistar/>`_ and is actively developed and maintained on Github.
 
 Documentation
 -------------
