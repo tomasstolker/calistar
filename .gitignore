@@ -5,7 +5,8 @@ docs/.ipynb_checkpoints/
 gaiaxp_6843672087120107264_0.jpg
 gaiaxp_6843672087120107264.dat
 docs/gaiaxp_6843672087120107264_0.jpg
-docs/gaiaxp_6843672087120107264.dat
+docs/gaiaxp_6843672087120107264_spec.dat
+docs/gaiaxp_6843672087120107264_cov.dat
 build/
 dist/
 calistar.egg-info/

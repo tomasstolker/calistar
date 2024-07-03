@@ -38,7 +38,8 @@ clean:
 	rm -f docs/calib_*
 	rm -f docs/target_*
 	rm -f gaiaxp_6843672087120107264_0.jpg
-	rm -f gaiaxp_6843672087120107264.dat
+	rm -f gaiaxp_6843672087120107264_spec.dat
+	rm -f gaiaxp_6843672087120107264_cov.dat
 	rm -f docs/gaiaxp_6843672087120107264_0.jpg
 	rm -f docs/gaiaxp_6843672087120107264.dat
 	rm -f calib_*

@@ -13,7 +13,8 @@ class TestCaliStar:
     def teardown_class(self):
         os.remove("calib_find_dr3_6843672087120107264.csv")
         os.remove("calib_select_dr3_6843672087120107264.csv")
-        os.remove("gaiaxp_6843672087120107264.dat")
+        os.remove("gaiaxp_6843672087120107264_spec.dat")
+        os.remove("gaiaxp_6843672087120107264_cov.dat")
         os.remove("gaiaxp_6843672087120107264.jpg")
         os.remove("target_dr3_6843672087120107264.json")
 

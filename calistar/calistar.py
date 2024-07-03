@@ -22,6 +22,7 @@ from astroquery.gaia import Gaia
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
 from gaiaxpy import calibrate, plot_spectra
+from gaiaxpy.core.generic_functions import correlation_to_covariance
 from rich import print as rprint
 from rich.progress import track
 from typeguard import typechecked
@@ -309,7 +310,6 @@ class CaliStar:
                     f"\nG mag = {gaia_result['phot_g_mean_mag'][0]:.6f} +/- {mag_g_error:.6f}"
                 )
 
-
         if "phot_bp_mean_mag" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["phot_bp_mean_mag"][0]):
                 target_dict[f"GAIA/GAIA{self.gaia_idx}.Gbp"] = (
@@ -343,7 +343,6 @@ class CaliStar:
                     f"GRVS mag = {gaia_result['grvs_mag'][0]:.6f} "
                     f"+/- {gaia_result['grvs_mag_error'][0]:.6f}"
                 )
-
 
         # Create SkyCoord object from the RA and Dec of the selected Gaia source ID
 
@@ -406,10 +405,10 @@ class CaliStar:
                 print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
                 print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
 
-                target_dict["teff"] = float(gaia_result['teff_gspphot'][0])
-                target_dict["log(g)"] = float(gaia_result['logg_gspphot'][0])
-                target_dict["metallicity"] = float(gaia_result['mh_gspphot'][0])
-                target_dict["ag_ext"] = float(gaia_result['ag_gspphot'][0])
+                target_dict["teff"] = float(gaia_result["teff_gspphot"][0])
+                target_dict["log(g)"] = float(gaia_result["logg_gspphot"][0])
+                target_dict["metallicity"] = float(gaia_result["mh_gspphot"][0])
+                target_dict["ag_ext"] = float(gaia_result["ag_gspphot"][0])
 
         print(
             f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
@@ -450,7 +449,7 @@ class CaliStar:
                 input_object=[f"{self.gaia_source}"],
                 sampling=np.geomspace(330, 1049.9999999999, 361),
                 truncation=False,
-                with_correlation=False,
+                with_correlation=True,
                 output_path="./",
                 # output_file=f"{self.gaia_source}_gaiaxp",
                 output_format=None,
@@ -474,14 +473,27 @@ class CaliStar:
             )
 
             xp_wavel = sampling * 1e-3  # (nm) -> (um)
-            xp_flux = 1e3 * df_cal["flux"].to_numpy()[0]  # (W m-2 nm-1) -> (W m-2 um-1)
-            xp_error = 1e3 * df_cal["flux_error"].to_numpy()[0]
+            xp_flux = 1e3 * df_cal["flux"][0]  # (W m-2 nm-1) -> (W m-2 um-1)
+            xp_error = 1e3 * df_cal["flux_error"][0]
+
+            xp_cov = correlation_to_covariance(
+                correlation=df_cal["correlation"][0],
+                error=df_cal["flux_error"][0],
+                stdev=1.0,
+            )
+
+            xp_cov *= 1e6  # (W m-2 nm-1)^2 -> (W m-2 um-1)^2
 
             header = "Wavelength (um) - Flux (W m-2 um-1) - Uncertainty (W m-2 um-1)"
-            xp_file = f"gaiaxp_{self.gaia_source}.dat"
+            xp_spec_file = f"gaiaxp_{self.gaia_source}_spec.dat"
             xp_spec = np.column_stack([xp_wavel, xp_flux, xp_error])
-            np.savetxt(xp_file, xp_spec, header=header)
-            print(f"Storing Gaia XP data: {xp_file}")
+            np.savetxt(xp_spec_file, xp_spec, header=header)
+            print(f"Storing Gaia XP spectrum: {xp_spec_file}")
+
+            header = "Covariances (W m-2 um-1)^2"
+            xp_cov_file = f"gaiaxp_{self.gaia_source}_cov.dat"
+            np.savetxt(xp_cov_file, xp_cov, header=header)
+            print(f"Storing Gaia XP covariances: {xp_cov_file}")
 
         # Add spectral type to the Simbad output
 
@@ -578,7 +590,9 @@ class CaliStar:
         if vizier_tycho is not None:
             vizier_tycho = vizier_tycho[0]
 
-            print(f"TYCHO source ID = {vizier_tycho['TYC1']}-{vizier_tycho['TYC2']}-{vizier_tycho['TYC3']}")
+            print(
+                f"TYCHO source ID = {vizier_tycho['TYC1']}-{vizier_tycho['TYC2']}-{vizier_tycho['TYC3']}"
+            )
 
             print(
                 f"Separation between Gaia and TYCHO source = "
