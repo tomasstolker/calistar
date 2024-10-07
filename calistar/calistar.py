@@ -444,10 +444,18 @@ class CaliStar:
             "has_xp_continuous" in gaia_result.columns
             and gaia_result["has_xp_continuous"][0]
         ):
-            # Sampling adopted from the Gaia XP documentation
+            # Sampling adopted from the GaiaXPy documentation
+            # https://gaiaxpy.readthedocs.io/en/latest/usage.html
+
+            # Default GaiaXPy sampling
+            # sampling = np.arange(336, 1021, 2)
+
+            # Improved sampling at the blue end of the spectrum
+            sampling = np.geomspace(330, 1049.9999999999, 361)
+
             df_cal, sampling = calibrate(
                 input_object=[f"{self.gaia_source}"],
-                sampling=np.geomspace(330, 1049.9999999999, 361),
+                sampling=sampling,
                 truncation=False,
                 with_correlation=True,
                 output_path="./",

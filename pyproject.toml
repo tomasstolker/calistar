@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calistar"
+version = "0.0.5"
+authors = [{name = "Tomas Stolker", email = "stolker@strw.leidenuniv.nl"}]
+description = "Tool to search for a calibration star"
+readme = "README.rst"
+requires-python = ">=3.9,<3.12"
+license = {text = "MIT License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+dynamic = ["dependencies"]
+
+[project.urls]
+Documentation = "https://calistar.readthedocs.io"
+Repository = "https://github.com/tomasstolker/calistar"
+Issues = "https://github.com/tomasstolker/calistar/issues"
+
+[tool.setuptools]
+packages = ["calistar"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = "requirements.txt"}
