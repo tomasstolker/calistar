@@ -1,6 +1,7 @@
 astropy
 astroquery
 gaiaxpy
+h5py
 matplotlib
 numpy
 pandas

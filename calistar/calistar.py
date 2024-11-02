@@ -404,11 +404,13 @@ class CaliStar:
                 print(f"Surface gravity = {gaia_result['logg_gspphot'][0]:.2f}")
                 print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
                 print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
+                print(f"A0 (541.4 nm) extinction = {gaia_result['ag_gspphot'][0]:.2f}")
 
                 target_dict["teff"] = float(gaia_result["teff_gspphot"][0])
                 target_dict["log(g)"] = float(gaia_result["logg_gspphot"][0])
                 target_dict["metallicity"] = float(gaia_result["mh_gspphot"][0])
                 target_dict["ag_ext"] = float(gaia_result["ag_gspphot"][0])
+                target_dict["azero_ext"] = float(gaia_result["azero_gspphot"][0])
 
         print(
             f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
