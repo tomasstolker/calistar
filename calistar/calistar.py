@@ -22,6 +22,7 @@ from astroquery.gaia import Gaia
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
 from gaiaxpy import calibrate, plot_spectra
+# from gaiaxpy.calibrator.calibrator import __create_merge as create_merge
 from gaiaxpy.core.generic_functions import correlation_to_covariance
 from rich import print as rprint
 from rich.progress import track
@@ -169,13 +170,13 @@ class CaliStar:
         write_json: bool = True,
         get_gaiaxp: bool = True,
         allwise_catalog: bool = True,
-    ) -> Dict[str, Union[str, float]]:
+    ) -> Dict[str, Union[float, str, Tuple[float, float]]]:
         """
         Function for retrieving the the astrometric and
         photometric properties of a target star of interest. The
         function returns a dictionary with the properties, but it
         also (optionally) stores the data in a JSON file in the
-        working folder.
+        working folder and retrieves the Gaia XP spectrum.
 
         Parameters
         ----------
@@ -276,7 +277,7 @@ class CaliStar:
 
         target_dict["Gaia RA"] = (
             float(gaia_result["ra"][0]),  # (deg)
-            float(gaia_result["dec_error"][0] / 3600.0),  # (deg)
+            float(gaia_result["ra_error"][0] / 3600.0),  # (deg)
         )
 
         target_dict["Gaia Dec"] = (
@@ -467,6 +468,9 @@ class CaliStar:
                 username=None,
                 password=None,
             )
+
+            # merge_bp = create_merge(xp='bp', sampling=sampling)
+            # merge_rp = create_merge(xp='rp', sampling=sampling)
 
             xp_plot = f"gaiaxp_{self.gaia_source}"
             print(f"\nStoring Gaia XP plot: {xp_plot}_0.jpg")
