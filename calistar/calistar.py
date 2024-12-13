@@ -170,6 +170,7 @@ class CaliStar:
         write_json: bool = True,
         get_gaiaxp: bool = True,
         allwise_catalog: bool = True,
+        print_astroph: bool = False,
     ) -> Dict[str, Union[float, str, Tuple[float, float]]]:
         """
         Function for retrieving the the astrometric and
@@ -194,6 +195,10 @@ class CaliStar:
             Select the WISE magnitudes from the ALLWISE catalog if set
             to ``True`` or select the magnitudes from the earlier WISE
             catalog if set to ``False``.
+        print_astroph : bool
+            Print a list with all the astrophysical parameters that
+            will be retrieved from the Gaia catalog when the
+            argument is set to ``True``.
 
         Returns
         -------
@@ -397,22 +402,6 @@ class CaliStar:
                     f"+/- {gaia_result['radial_velocity_error'][0]:.2f} km/s"
                 )
 
-        if "teff_gspphot" in gaia_result.columns:
-            if not np.ma.is_masked(gaia_result["teff_gspphot"]):
-                print(
-                    f"\nEffective temperature = {gaia_result['teff_gspphot'][0]:.0f} K"
-                )
-                print(f"Surface gravity = {gaia_result['logg_gspphot'][0]:.2f}")
-                print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
-                print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
-                print(f"A0 (541.4 nm) extinction = {gaia_result['ag_gspphot'][0]:.2f}")
-
-                target_dict["teff"] = float(gaia_result["teff_gspphot"][0])
-                target_dict["log(g)"] = float(gaia_result["logg_gspphot"][0])
-                target_dict["metallicity"] = float(gaia_result["mh_gspphot"][0])
-                target_dict["ag_ext"] = float(gaia_result["ag_gspphot"][0])
-                target_dict["azero_ext"] = float(gaia_result["azero_gspphot"][0])
-
         print(
             f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
         )
@@ -440,6 +429,43 @@ class CaliStar:
 
         if "has_rvs" in gaia_result.columns:
             print(f"RVS spectrum = {gaia_result['has_rvs'][0]}")
+
+        if "teff_gspphot" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["teff_gspphot"]):
+                print(
+                    f"\nEffective temperature = {gaia_result['teff_gspphot'][0]:.0f} K"
+                )
+                print(f"Surface gravity = {gaia_result['logg_gspphot'][0]:.2f}")
+                print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
+                print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
+                print(f"A0 (541.4 nm) extinction = {gaia_result['ag_gspphot'][0]:.2f}")
+
+                target_dict["teff"] = float(gaia_result["teff_gspphot"][0])
+                target_dict["log(g)"] = float(gaia_result["logg_gspphot"][0])
+                target_dict["metallicity"] = float(gaia_result["mh_gspphot"][0])
+                target_dict["ag_ext"] = float(gaia_result["ag_gspphot"][0])
+                target_dict["azero_ext"] = float(gaia_result["azero_gspphot"][0])
+
+        # Gaia query for selected the astrophysical parameters
+
+        if print_astroph:
+            print(f"\n-> Querying astrophysical parameters...\n")
+
+            gaia_query = f"""
+            SELECT *
+            FROM gaia{self.gaia_release.lower()}.astrophysical_parameters
+            WHERE source_id = {self.gaia_source}
+            """
+
+            # Launch the Gaia job and get the results
+
+            gaia_job = Gaia.launch_job_async(gaia_query, dump_to_file=False, verbose=False)
+            gaia_result = gaia_job.get_results()
+
+            print("\nAstrophysical parameters:")
+
+            for param_item in gaia_result.columns:
+                print(f"   - {param_item} = {gaia_result.columns[param_item][0]}")
 
         # Gaia XP spectrum
 
