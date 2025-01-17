@@ -558,16 +558,16 @@ class CaliStar:
             f"GAIA {self.gaia_release} {self.gaia_source}"
         )
 
-        if simbad_result is not None:
+        if simbad_result is not None and len(simbad_result) > 0:
             simbad_result = simbad_result[0]
 
-            print(f"Simbad ID = {simbad_result['MAIN_ID']}")
+            print(f"Simbad ID = {simbad_result['main_id']}")
 
-            print(f"Spectral type = {simbad_result['SP_TYPE']}")
+            print(f"Spectral type = {simbad_result['sp_type']}")
 
-            target_dict["Simbad ID"] = simbad_result["MAIN_ID"]
+            target_dict["Simbad ID"] = simbad_result["main_id"]
 
-            target_dict["SpT"] = simbad_result["SP_TYPE"]
+            target_dict["SpT"] = simbad_result["sp_type"]
 
             # print(
             #     f"\n2MASS J mag = {simbad_result['FLUX_J']:.3f} "
@@ -627,7 +627,7 @@ class CaliStar:
         else:
             vizier_tycho = None
 
-        if vizier_tycho is not None:
+        if vizier_tycho is not None and len(vizier_tycho) > 0:
             vizier_tycho = vizier_tycho[0]
 
             print(
@@ -679,10 +679,10 @@ class CaliStar:
         else:
             vizier_2mass = None
 
-        if vizier_2mass is not None:
+        if vizier_2mass is not None and len(vizier_2mass) > 0:
             vizier_2mass = vizier_2mass[0]
 
-            print(f"\n2MASS source ID = {vizier_2mass['_2MASS']}")
+            print(f"\n2MASS source ID = {vizier_2mass['2MASS']}")
 
             print(
                 f"Separation between Gaia and 2MASS source = "
@@ -748,7 +748,7 @@ class CaliStar:
             if "II/311/wise" in vizier_result.keys():
                 vizier_wise = vizier_result["II/311/wise"]
 
-        if vizier_wise is not None:
+        if vizier_wise is not None and len(vizier_wise) > 0:
             vizier_wise = vizier_wise[0]
 
             if allwise_catalog:
@@ -828,8 +828,8 @@ class CaliStar:
 
         found_wds = False
 
-        if simbad_result is not None:
-            simbad_ids = simbad_result["IDS"].split("|")
+        if simbad_result is not None and len(simbad_result) > 0:
+            simbad_ids = simbad_result["ids"].split("|")
             wds_id = list(filter(lambda x: x.startswith("WDS"), simbad_ids))
 
             if len(wds_id) == 1:
@@ -1055,15 +1055,15 @@ class CaliStar:
             if simbad_result is not None:
                 simbad_result = simbad_result[0]
 
-                if np.ma.is_masked(simbad_result["MAIN_ID"]):
+                if np.ma.is_masked(simbad_result["main_id"]):
                     cal_df.loc[gaia_item.index, "Simbad ID"] = np.nan
                 else:
-                    cal_df.loc[gaia_item.index, "Simbad ID"] = simbad_result["MAIN_ID"]
+                    cal_df.loc[gaia_item.index, "Simbad ID"] = simbad_result["main_id"]
 
-                if np.ma.is_masked(simbad_result["SP_TYPE"]):
+                if np.ma.is_masked(simbad_result["sp_type"]):
                     cal_df.loc[gaia_item.index, "SpT"] = np.nan
                 else:
-                    cal_df.loc[gaia_item.index, "SpT"] = simbad_result["SP_TYPE"]
+                    cal_df.loc[gaia_item.index, "SpT"] = simbad_result["sp_type"]
 
                 # if np.ma.is_masked(simbad_result["FLUX_J"]):
                 #     cal_df.loc[gaia_item.index, "2MASS/2MASS.J"] = np.nan
@@ -1178,7 +1178,7 @@ class CaliStar:
             # Query The Washington Visual Double Star Catalog
 
             if simbad_result is not None:
-                simbad_ids = simbad_result["IDS"].split("|")
+                simbad_ids = simbad_result["ids"].split("|")
                 wds_id = list(filter(lambda x: x.startswith("WDS"), simbad_ids))
 
                 if len(wds_id) == 1:
