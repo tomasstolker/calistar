@@ -537,11 +537,17 @@ class CaliStar:
 
         # Add spectral type to the Simbad output
 
-        # print(Simbad.list_votable_fields())
+        # for item in Simbad.list_votable_fields():
+        #     print(item)
 
         Simbad.add_votable_fields(
             "sptype",
             "ids",
+            "sp",
+            "sp_qual",
+            "sp_bibcode",
+            "otype",
+            "otype_txt",
             # "flux(J)",
             # "flux(H)",
             # "flux(K)",
@@ -562,12 +568,13 @@ class CaliStar:
             simbad_result = simbad_result[0]
 
             print(f"Simbad ID = {simbad_result['main_id']}")
-
+            print(f"Object type = {simbad_result['otype_txt']}")
             print(f"Spectral type = {simbad_result['sp_type']}")
+            print(f"Reference = {simbad_result['sp_bibcode']}")
 
             target_dict["Simbad ID"] = simbad_result["main_id"]
-
-            target_dict["SpT"] = simbad_result["sp_type"]
+            target_dict["Spectral Type"] = simbad_result["sp_type"]
+            target_dict["Object Type"] = simbad_result["otype_txt"]
 
             # print(
             #     f"\n2MASS J mag = {simbad_result['FLUX_J']:.3f} "
