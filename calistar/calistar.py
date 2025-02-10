@@ -691,7 +691,7 @@ class CaliStar:
 
             print(f"\n2MASS source ID = {vizier_2mass['2MASS']}")
 
-            target_dict["2MASS ID "] = vizier_2mass["2MASS"]
+            target_dict["2MASS ID"] = vizier_2mass["2MASS"]
 
             print(
                 f"Separation between Gaia and 2MASS source = "
@@ -762,11 +762,11 @@ class CaliStar:
 
             if allwise_catalog:
                 print(f"\nALLWISE source ID = {vizier_wise['AllWISE']}")
-                target_dict["WISE ID "] = vizier_wise["AllWISE"]
+                target_dict["WISE ID"] = vizier_wise["AllWISE"]
 
             else:
                 print(f"\nWISE source ID = {vizier_wise['WISE']}")
-                target_dict["WISE ID "] = vizier_wise["WISE"]
+                target_dict["WISE ID"] = vizier_wise["WISE"]
 
             print(
                 f"Separation between Gaia and WISE source = "
