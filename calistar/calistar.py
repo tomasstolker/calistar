@@ -22,6 +22,7 @@ from astroquery.gaia import Gaia
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
 from gaiaxpy import calibrate, plot_spectra
+
 # from gaiaxpy.calibrator.calibrator import __create_merge as create_merge
 from gaiaxpy.core.generic_functions import correlation_to_covariance
 from rich import print as rprint
@@ -459,13 +460,19 @@ class CaliStar:
 
             # Launch the Gaia job and get the results
 
-            gaia_job = Gaia.launch_job_async(gaia_query, dump_to_file=False, verbose=False)
+            gaia_job = Gaia.launch_job_async(
+                gaia_query, dump_to_file=False, verbose=False
+            )
             gaia_result = gaia_job.get_results()
 
-            print("\nAstrophysical parameters:")
+            if len(gaia_result) == 0:
+                print("\nTarget has no data in the astrophysical_parameters catalog")
 
-            for param_item in gaia_result.columns:
-                print(f"   - {param_item} = {gaia_result.columns[param_item][0]}")
+            else:
+                print("\nAstrophysical parameters:")
+
+                for param_item in gaia_result.columns:
+                    print(f"   - {param_item} = {gaia_result.columns[param_item][0]}")
 
         # Gaia XP spectrum
 
@@ -638,13 +645,21 @@ class CaliStar:
             vizier_tycho = vizier_tycho[0]
 
             print(
-                f"TYCHO source ID = {vizier_tycho['TYC1']}-{vizier_tycho['TYC2']}-{vizier_tycho['TYC3']}"
+                f"TYCHO source ID = {vizier_tycho['TYC1']}-"
+                "{vizier_tycho['TYC2']}-{vizier_tycho['TYC3']}"
             )
 
             print(
                 f"Separation between Gaia and TYCHO source = "
                 f"{1e3*vizier_tycho['_r']:.1f} mas"
             )
+
+            if 1e3 * vizier_tycho["_r"] > 10.0:
+                warnings.warn(
+                    "The separation between the Gaia and TYCHO source "
+                    "is more than 10 mas. Please check carefully if "
+                    "these are indeed the same sources."
+                )
 
             if np.ma.is_masked(vizier_tycho["e_BTmag"]):
                 if not np.ma.is_masked(vizier_tycho["BTmag"]):
@@ -697,6 +712,13 @@ class CaliStar:
                 f"Separation between Gaia and 2MASS source = "
                 f"{1e3*vizier_2mass['_r']:.1f} mas"
             )
+
+            if 1e3 * vizier_2mass["_r"] > 10.0:
+                warnings.warn(
+                    "The separation between the Gaia and 2MASS source "
+                    "is more than 10 mas. Please check carefully if "
+                    "these are indeed the same sources."
+                )
 
             if np.ma.is_masked(vizier_2mass["e_Jmag"]):
                 if not np.ma.is_masked(vizier_2mass["Jmag"]):
@@ -772,6 +794,13 @@ class CaliStar:
                 f"Separation between Gaia and WISE source = "
                 f"{1e3*vizier_wise['_r']:.1f} mas"
             )
+
+            if 1e3 * vizier_wise["_r"] > 10.0:
+                warnings.warn(
+                    "The separation between the Gaia and WISE source "
+                    "is more than 10 mas. Please check carefully if "
+                    "these are indeed the same sources."
+                )
 
             if np.ma.is_masked(vizier_wise["e_W1mag"]):
                 if not np.ma.is_masked(vizier_wise["W1mag"]):
