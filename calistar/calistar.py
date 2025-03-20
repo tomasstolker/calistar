@@ -654,6 +654,8 @@ class CaliStar:
                 f"{1e3*vizier_tycho['_r']:.1f} mas"
             )
 
+            target_dict["TYCHO separation"] = 1e3 * vizier_tycho['_r']
+
             if 1e3 * vizier_tycho["_r"] > 10.0:
                 warnings.warn(
                     "The separation between the Gaia and TYCHO source "
@@ -712,6 +714,8 @@ class CaliStar:
                 f"Separation between Gaia and 2MASS source = "
                 f"{1e3*vizier_2mass['_r']:.1f} mas"
             )
+
+            target_dict["2MASS separation"] = 1e3 * vizier_2mass['_r']
 
             if 1e3 * vizier_2mass["_r"] > 10.0:
                 warnings.warn(
@@ -794,6 +798,8 @@ class CaliStar:
                 f"Separation between Gaia and WISE source = "
                 f"{1e3*vizier_wise['_r']:.1f} mas"
             )
+
+            target_dict["WISE separation"] = 1e3 * vizier_wise['_r']
 
             if 1e3 * vizier_wise["_r"] > 10.0:
                 warnings.warn(
