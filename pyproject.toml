@@ -1,24 +1,53 @@
 [build-system]
-requires = ["setuptools>=64.0", "setuptools-scm>=8.0"]
+requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "calistar"
-version = "0.1.0"
 authors = [{name = "Tomas Stolker", email = "stolker@strw.leidenuniv.nl"}]
 description = "Tool to search for a calibration star"
 readme = "README.rst"
 requires-python = ">=3.10,<3.13"
-license = {text = "MIT License"}
+license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
-dynamic = ["dependencies"]
+dependencies = [
+    "astropy",
+    "astroquery",
+    "gaiaxpy",
+    "h5py",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "pooch",
+    "rich",
+    "tqdm",
+    "typeguard",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+docs = [
+    "jupyter",
+    "nbsphinx",
+    "pandoc",
+    "sphinx",
+    "sphinx-automodapi",
+    "sphinx_book_theme",
+]
+test = [
+    "black",
+    "flake8",
+    "pycodestyle",
+    "pylint",
+    "pytest",
+    "pytest-cov",
+]
 
 [project.urls]
 Documentation = "https://calistar.readthedocs.io"
@@ -28,5 +57,5 @@ Issues = "https://github.com/tomasstolker/calistar/issues"
 [tool.setuptools]
 packages = ["calistar"]
 
-[tool.setuptools.dynamic]
-dependencies = {file = "requirements.txt"}
+[tool.setuptools_scm]
+write_to = "calistar/_version.py"
