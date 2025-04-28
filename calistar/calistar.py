@@ -25,11 +25,10 @@ from gaiaxpy import calibrate, plot_spectra
 
 # from gaiaxpy.calibrator.calibrator import __create_merge as create_merge
 from gaiaxpy.core.generic_functions import correlation_to_covariance
-from rich import print as rprint
-from rich.progress import track
+from tqdm import tqdm
 from typeguard import typechecked
 
-import calistar
+from ._version import __version__, __version_tuple__
 
 
 # No limit on the number of rows with a Gaia query
@@ -68,12 +67,48 @@ class CaliStar:
             None
         """
 
-        calistar_init = f"[bold magenta]calistar v{calistar.__version__}[/bold magenta]"
-        len_text = len(f"calistar v{calistar.__version__}")
+        print("========\ncalistar\n========")
 
-        print(len_text * "=")
-        rprint(calistar_init)
-        print(len_text * "=")
+        # Check if there is a new version available
+
+        calistar_version = (
+            f"{__version_tuple__[0]}."
+            f"{__version_tuple__[1]}."
+            f"{__version_tuple__[2]}"
+        )
+
+        try:
+            pypi_url = "https://pypi.org/pypi/calistar/json"
+
+            with urllib.request.urlopen(pypi_url, timeout=1.0) as open_url:
+                url_content = open_url.read()
+                url_data = json.loads(url_content)
+                pypi_version = url_data["info"]["version"]
+
+        except (urllib.error.URLError, socket.timeout):
+            pypi_version = None
+
+        if pypi_version is not None:
+            pypi_split = pypi_version.split(".")
+            current_split = calistar_version.split(".")
+
+            new_major = (pypi_split[0] == current_split[0]) & (
+                pypi_split[1] > current_split[1]
+            )
+
+            new_minor = (
+                (pypi_split[0] == current_split[0])
+                & (pypi_split[1] == current_split[1])
+                & (pypi_split[2] > current_split[2])
+            )
+
+        print(f"\nVersion: {__version__}")
+
+        if pypi_version is not None and (new_major | new_minor):
+            print(f"\nA new version ({pypi_version}) is available!")
+            print("Want to stay informed about updates?")
+            print("Please have a look at the Github page:")
+            print("https://github.com/tomasstolker/calistar")
 
         # Set attributes of CaliStar
 
@@ -121,25 +156,6 @@ class CaliStar:
             "WISE/WISE.W3",
             "WISE/WISE.W4",
         ]
-
-        # Check if there is a new version available
-
-        try:
-            pypi_url = "https://pypi.org/pypi/calistar/json"
-
-            with urllib.request.urlopen(pypi_url, timeout=1.0) as open_url:
-                url_content = open_url.read()
-                url_data = json.loads(url_content)
-                latest_version = url_data["info"]["version"]
-
-        except (urllib.error.URLError, socket.timeout):
-            latest_version = None
-
-        if latest_version is not None and calistar.__version__ != latest_version:
-            print(f"\nA new version ({latest_version}) is available!")
-            print("Want to stay informed about updates?")
-            print("Please have a look at the Github page:")
-            print("https://github.com/tomasstolker/calistar")
 
         # Create .calistar folder in the home directory
 
@@ -1063,7 +1079,7 @@ class CaliStar:
 
         vizier_obj = Vizier(columns=["*", "+_r"], timeout=10.0, row_limit=1)
 
-        for gaia_item in track(gaia_results, description="Processing..."):
+        for gaia_item in tqdm(gaia_results):
             if "SOURCE_ID" in gaia_item.columns:
                 gaia_source_id = int(gaia_item["SOURCE_ID"])
             elif "source_id" in gaia_item.columns:
@@ -1099,7 +1115,7 @@ class CaliStar:
                 f"GAIA {self.gaia_release} {gaia_source_id}"
             )
 
-            if simbad_result is not None:
+            if simbad_result is not None and len(simbad_result) > 0:
                 simbad_result = simbad_result[0]
 
                 if np.ma.is_masked(simbad_result["main_id"]):
@@ -1224,7 +1240,7 @@ class CaliStar:
 
             # Query The Washington Visual Double Star Catalog
 
-            if simbad_result is not None:
+            if simbad_result is not None and len(simbad_result) > 0:
                 simbad_ids = simbad_result["ids"].split("|")
                 wds_id = list(filter(lambda x: x.startswith("WDS"), simbad_ids))
 
@@ -1359,7 +1375,7 @@ class CaliStar:
 
         drop_indices = []
 
-        for row_idx in track(range(len(cal_df)), description="Processing..."):
+        for row_idx in tqdm(range(len(cal_df))):
             for filter_item in filter_names:
                 if np.isnan(cal_df.loc[row_idx, filter_item]) or (
                     np.abs(
