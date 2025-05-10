@@ -564,7 +564,7 @@ class CaliStar:
         #     print(item)
 
         Simbad.add_votable_fields(
-            "sptype",
+            "sp_type",
             "ids",
             "sp",
             "sp_qual",
@@ -662,7 +662,7 @@ class CaliStar:
 
             print(
                 f"TYCHO source ID = {vizier_tycho['TYC1']}-"
-                "{vizier_tycho['TYC2']}-{vizier_tycho['TYC3']}"
+                f"{vizier_tycho['TYC2']}-{vizier_tycho['TYC3']}"
             )
 
             print(
@@ -1010,7 +1010,7 @@ class CaliStar:
         # print(Simbad.list_votable_fields())
 
         Simbad.add_votable_fields(
-            "sptype",
+            "sp_type",
             "ids",
             # "flux(J)",
             # "flux(H)",
