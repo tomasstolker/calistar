@@ -455,7 +455,7 @@ class CaliStar:
                 print(f"Surface gravity = {gaia_result['logg_gspphot'][0]:.2f}")
                 print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
                 print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
-                print(f"A0 (541.4 nm) extinction = {gaia_result['ag_gspphot'][0]:.2f}")
+                print(f"A0 (541.4 nm) extinction = {gaia_result['azero_gspphot'][0]:.2f}")
 
                 target_dict["teff"] = float(gaia_result["teff_gspphot"][0])
                 target_dict["log(g)"] = float(gaia_result["logg_gspphot"][0])
@@ -921,12 +921,36 @@ class CaliStar:
 
                     print(f"Observation 1 = {wds_select['Obs1']}")
                     print(f"Observation 2 = {wds_select['Obs2']}")
-                    print(f"Separation 1 (arcsec) = {wds_select['sep1']:.2f}")
-                    print(f"Separation 2 (arcsec) = {wds_select['sep2']:.2f}")
-                    print(f"Position angle 1 (deg) = {wds_select['pa1']:.2f}")
-                    print(f"Position angle 2 (deg) = {wds_select['pa2']:.2f}")
-                    print(f"Magnitude 1 = {wds_select['mag1']:.2f}")
-                    print(f"Magnitude 2 = {wds_select['mag2']:.2f}")
+
+                    if wds_select['sep1'] is not np.ma.masked:
+                        print(f"Separation 1 (arcsec) = {wds_select['sep1']:.2f}")
+                    else:
+                        print(f"Separation 1 (arcsec) = --")
+
+                    if wds_select['sep2'] is not np.ma.masked:
+                        print(f"Separation 2 (arcsec) = {wds_select['sep2']:.2f}")
+                    else:
+                        print(f"Separation 2 (arcsec) = --")
+
+                    if wds_select['pa1'] is not np.ma.masked:
+                        print(f"Position angle 1 (deg) = {wds_select['pa1']:.2f}")
+                    else:
+                        print(f"Position angle 1 (deg) = --")
+
+                    if wds_select['pa2'] is not np.ma.masked:
+                        print(f"Position angle 2 (deg) = {wds_select['pa2']:.2f}")
+                    else:
+                        print(f"Position angle 2 (deg) = --")
+
+                    if wds_select['mag1'] is not np.ma.masked:
+                        print(f"Magnitude 1 = {wds_select['mag1']:.2f}")
+                    else:
+                        print(f"Magnitude 1 = --")
+
+                    if wds_select['mag2'] is not np.ma.masked:
+                        print(f"Magnitude 2 = {wds_select['mag2']:.2f}")
+                    else:
+                        print(f"Magnitude 2 = --")
 
                     found_wds = True
 
