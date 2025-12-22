@@ -40,6 +40,7 @@ clean:
 	find . -name '__pycache__' -exec rm -rf {} +
 	rm -f .coverage*
 	rm -f coverage.xml
+	rm -f calistar/_version.py
 	rm -f docs/calib_*
 	rm -f docs/target_*
 	rm -f gaiaxp_6843672087120107264_0.jpg

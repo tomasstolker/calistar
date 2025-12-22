@@ -1,5 +1,6 @@
 *.pyc
 .DS_Store
+calistar/_version.py
 docs/_build
 docs/.ipynb_checkpoints/
 gaiaxp_6843672087120107264_0.jpg

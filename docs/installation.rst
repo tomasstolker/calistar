@@ -3,7 +3,7 @@
 Installation
 ============
 
-``calistar`` is compatible with `Python <https://www.python.org>`_ versions 3.10/3.11/3.12 and is available in the `PyPI repository <https://pypi.org/project/calistar/>`_ and on `Github <https://github.com/tomasstolker/calistar>`_.
+``calistar`` is available on `PyPI <https://pypi.org/project/calistar/>`_ and `Github <https://github.com/tomasstolker/calistar>`_.
 
 Installation from PyPI
 ----------------------

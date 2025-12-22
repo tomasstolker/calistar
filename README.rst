@@ -30,8 +30,8 @@ Copyright 2025 Tomas Stolker
 .. |Python Versions| image:: https://img.shields.io/pypi/pyversions/calistar
    :target: https://pypi.python.org/pypi/calistar
 
-.. |CI Status| image:: https://github.com/tomasstolker/calistar/actions/workflows/main.yml/badge.svg
-   :target: https://github.com/tomasstolker/calistar/actions
+.. |CI Status| image:: https://github.com/tomasstolker/calistar/actions/workflows/main.yml/badge.svg?branch=main
+   :target: https://github.com/tomasstolker/calistar/actions/workflows/main.yml
 
 .. |Docs Status| image:: https://img.shields.io/readthedocs/calistar
    :target: http://calistar.readthedocs.io

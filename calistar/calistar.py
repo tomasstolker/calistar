@@ -106,9 +106,8 @@ class CaliStar:
 
         if pypi_version is not None and (new_major | new_minor):
             print(f"\nA new version ({pypi_version}) is available!")
-            print("Want to stay informed about updates?")
-            print("Please have a look at the Github page:")
-            print("https://github.com/tomasstolker/calistar")
+            print("Update calistar by running:")
+            print("pip install --upgrade calistar")
 
         # Set attributes of CaliStar
 
@@ -299,12 +298,12 @@ class CaliStar:
 
         target_dict["Gaia RA"] = (
             float(gaia_result["ra"][0]),  # (deg)
-            float(gaia_result["ra_error"][0] / 3600.0),  # (deg)
+            float(gaia_result["ra_error"][0]*1e-3/3600.),  # (mas) -> (deg)
         )
 
         target_dict["Gaia Dec"] = (
             float(gaia_result["dec"][0]),  # (deg)
-            float(gaia_result["dec_error"][0] / 3600.0),  # (deg)
+            float(gaia_result["dec_error"][0]*1e-3/3600.),  # (mas) -> (deg)
         )
 
         target_dict["Gaia pm RA"] = (
@@ -377,7 +376,7 @@ class CaliStar:
         )
 
         coord_str = gaia_coord.to_string(
-            "hmsdms", alwayssign=True, precision=2, pad=True
+            "hmsdms", alwayssign=True, precision=4, pad=True
         )
 
         if self.gaia_source != gaia_source_id:
