@@ -61,6 +61,6 @@ html_context = {
     "doc_path": "docs",
 }
 
-html_static_path = ['_static']
+html_static_path = []
 
 html_search_language = 'en'

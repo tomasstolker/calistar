@@ -105,9 +105,7 @@ class CaliStar:
         print(f"\nVersion: {__version__}")
 
         if pypi_version is not None and (new_major | new_minor):
-            print(f"\nA new version ({pypi_version}) is available!")
-            print("Update calistar by running:")
-            print("pip install --upgrade calistar")
+            print(f"\n-> calistar v{pypi_version} is available!")
 
         # Set attributes of CaliStar
 
@@ -261,6 +259,11 @@ class CaliStar:
             gaia_bp_zp = (25.3385422158, 0.0027901700)
             gaia_rp_zp = (24.7478955012, 0.0037793818)
 
+        else:
+            raise ValueError(
+                f"The '{self.gaia_release}' data release is not supported."
+            )
+
         # Magnitude error, assuming Delta_f << f
         # Delta_m = -2.5/ln(10) Delta_f/f
         # Add in quadrature the uncertainty on the zero point
@@ -298,12 +301,12 @@ class CaliStar:
 
         target_dict["Gaia RA"] = (
             float(gaia_result["ra"][0]),  # (deg)
-            float(gaia_result["ra_error"][0]*1e-3/3600.),  # (mas) -> (deg)
+            float(gaia_result["ra_error"][0] * 1e-3 / 3600.0),  # (mas) -> (deg)
         )
 
         target_dict["Gaia Dec"] = (
             float(gaia_result["dec"][0]),  # (deg)
-            float(gaia_result["dec_error"][0]*1e-3/3600.),  # (mas) -> (deg)
+            float(gaia_result["dec_error"][0] * 1e-3 / 3600.0),  # (mas) -> (deg)
         )
 
         target_dict["Gaia pm RA"] = (
@@ -454,7 +457,9 @@ class CaliStar:
                 print(f"Surface gravity = {gaia_result['logg_gspphot'][0]:.2f}")
                 print(f"Metallicity = {gaia_result['mh_gspphot'][0]:.2f}")
                 print(f"G-band extinction = {gaia_result['ag_gspphot'][0]:.2f}")
-                print(f"A0 (541.4 nm) extinction = {gaia_result['azero_gspphot'][0]:.2f}")
+                print(
+                    f"A0 (541.4 nm) extinction = {gaia_result['azero_gspphot'][0]:.2f}"
+                )
 
                 target_dict["teff"] = float(gaia_result["teff_gspphot"][0])
                 target_dict["log(g)"] = float(gaia_result["logg_gspphot"][0])
@@ -465,7 +470,7 @@ class CaliStar:
         # Gaia query for selected the astrophysical parameters
 
         if print_astroph:
-            print(f"\n-> Querying astrophysical parameters...\n")
+            print("\n-> Querying astrophysical parameters...\n")
 
             gaia_query = f"""
             SELECT *
@@ -669,7 +674,7 @@ class CaliStar:
                 f"{1e3*vizier_tycho['_r']:.1f} mas"
             )
 
-            target_dict["TYCHO separation"] = 1e3 * vizier_tycho['_r']
+            target_dict["TYCHO separation"] = 1e3 * vizier_tycho["_r"]
 
             if 1e3 * vizier_tycho["_r"] > 10.0:
                 warnings.warn(
@@ -730,7 +735,7 @@ class CaliStar:
                 f"{1e3*vizier_2mass['_r']:.1f} mas"
             )
 
-            target_dict["2MASS separation"] = 1e3 * vizier_2mass['_r']
+            target_dict["2MASS separation"] = 1e3 * vizier_2mass["_r"]
 
             if 1e3 * vizier_2mass["_r"] > 10.0:
                 warnings.warn(
@@ -814,7 +819,7 @@ class CaliStar:
                 f"{1e3*vizier_wise['_r']:.1f} mas"
             )
 
-            target_dict["WISE separation"] = 1e3 * vizier_wise['_r']
+            target_dict["WISE separation"] = 1e3 * vizier_wise["_r"]
 
             if 1e3 * vizier_wise["_r"] > 10.0:
                 warnings.warn(
@@ -921,35 +926,35 @@ class CaliStar:
                     print(f"Observation 1 = {wds_select['Obs1']}")
                     print(f"Observation 2 = {wds_select['Obs2']}")
 
-                    if wds_select['sep1'] is not np.ma.masked:
+                    if wds_select["sep1"] is not np.ma.masked:
                         print(f"Separation 1 (arcsec) = {wds_select['sep1']:.2f}")
                     else:
-                        print(f"Separation 1 (arcsec) = --")
+                        print("Separation 1 (arcsec) = --")
 
-                    if wds_select['sep2'] is not np.ma.masked:
+                    if wds_select["sep2"] is not np.ma.masked:
                         print(f"Separation 2 (arcsec) = {wds_select['sep2']:.2f}")
                     else:
-                        print(f"Separation 2 (arcsec) = --")
+                        print("Separation 2 (arcsec) = --")
 
-                    if wds_select['pa1'] is not np.ma.masked:
+                    if wds_select["pa1"] is not np.ma.masked:
                         print(f"Position angle 1 (deg) = {wds_select['pa1']:.2f}")
                     else:
-                        print(f"Position angle 1 (deg) = --")
+                        print("Position angle 1 (deg) = --")
 
-                    if wds_select['pa2'] is not np.ma.masked:
+                    if wds_select["pa2"] is not np.ma.masked:
                         print(f"Position angle 2 (deg) = {wds_select['pa2']:.2f}")
                     else:
-                        print(f"Position angle 2 (deg) = --")
+                        print("Position angle 2 (deg) = --")
 
-                    if wds_select['mag1'] is not np.ma.masked:
+                    if wds_select["mag1"] is not np.ma.masked:
                         print(f"Magnitude 1 = {wds_select['mag1']:.2f}")
                     else:
-                        print(f"Magnitude 1 = --")
+                        print("Magnitude 1 = --")
 
-                    if wds_select['mag2'] is not np.ma.masked:
+                    if wds_select["mag2"] is not np.ma.masked:
                         print(f"Magnitude 2 = {wds_select['mag2']:.2f}")
                     else:
-                        print(f"Magnitude 2 = --")
+                        print("Magnitude 2 = --")
 
                     found_wds = True
 
@@ -1051,14 +1056,24 @@ class CaliStar:
         print(f"G mag search range = ({mag_low:.2f}, {mag_upp:.2f})")
 
         gaia_query = f"""
-        SELECT *, DISTANCE({target_dict['Gaia RA'][0]},
-        {target_dict['Gaia Dec'][0]}, ra, dec) AS ang_sep
+        SELECT *,
+        DISTANCE(
+            POINT('ICRS', ra, dec),
+            POINT('ICRS', {target_dict['Gaia RA'][0]}, {target_dict['Gaia Dec'][0]})
+        ) AS ang_sep
         FROM gaia{self.gaia_release.lower()}.gaia_source
-        WHERE DISTANCE({target_dict['Gaia RA'][0]},
-        {target_dict['Gaia Dec'][0]}, ra, dec) < {search_radius}
-        AND phot_g_mean_mag > {mag_low}
-        AND phot_g_mean_mag < {mag_upp}
-        AND parallax IS NOT NULL
+        WHERE CONTAINS(
+                POINT('ICRS', ra, dec),
+                CIRCLE(
+                  'ICRS',
+                  {target_dict['Gaia RA'][0]},
+                  {target_dict['Gaia Dec'][0]},
+                  {search_radius}
+                )
+              ) = 1
+          AND phot_g_mean_mag > {mag_low}
+          AND phot_g_mean_mag < {mag_upp}
+          AND parallax IS NOT NULL
         ORDER BY ang_sep ASC
         """
 

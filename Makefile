@@ -40,16 +40,14 @@ clean:
 	find . -name '__pycache__' -exec rm -rf {} +
 	rm -f .coverage*
 	rm -f coverage.xml
-	rm -f calistar/_version.py
-	rm -f docs/calib_*
-	rm -f docs/target_*
-	rm -f gaiaxp_6843672087120107264_0.jpg
-	rm -f gaiaxp_6843672087120107264_spec.dat
-	rm -f gaiaxp_6843672087120107264_cov.dat
-	rm -f docs/gaiaxp_6843672087120107264_0.jpg
-	rm -f docs/gaiaxp_6843672087120107264.dat
+	rm -f gaiaxp_*.jpg
+	rm -f gaiaxp_*.dat
+	rm -f docs/gaiaxp_*.jpg
+	rm -f docs/gaiaxp_*.dat
 	rm -f calib_*
 	rm -f target_*
+	rm -f docs/calib_*
+	rm -f docs/target_*
 	rm -rf .pytest_cache/
 	rm -rf docs/_build/
 	rm -rf docs/.ipynb_checkpoints/
