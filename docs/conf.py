@@ -7,31 +7,33 @@
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
+# add these directories to sys.path here.
 
-import os
 import sys
-sys.path.insert(0, os.path.abspath('../'))
+
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 # -- Project information -----------------------------------------------------
 
-project = 'calistar'
-copyright = '2025, Tomas Stolker'
-author = 'Tomas Stolker'
+project = "calistar"
+copyright = "2026, Tomas Stolker"
+author = "Tomas Stolker"
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
+# extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx_automodapi.automodapi',
-    'nbsphinx'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx_automodapi.automodapi",
+    "nbsphinx"
 ]
 
 numpydoc_show_class_members = False
@@ -40,18 +42,23 @@ numpydoc_show_class_members = False
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 
-exclude_patterns = ['_build',
-                    'Thumbs.db',
-                    '.DS_Store',
-                    '.ipynb_checkpoints/*']
+exclude_patterns = ["_build",
+                    "Thumbs.db",
+                    ".DS_Store",
+                    ".ipynb_checkpoints/*"]
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = 'pydata_sphinx_theme'
+html_theme = "sphinxawesome_theme"
 
 html_theme_options = {
-    'github_url': 'https://github.com/tomasstolker/calistar',
-    'use_edit_page_button': True,
+    "show_breadcrumbs": True,
+    "show_scrolltop": True,
+    "show_prev_next": True,
+    "main_nav_links": {
+        "GitHub": "https://github.com/tomasstolker/calistar",
+        "PyPI": "https://pypi.org/project/calistar/",
+    },
 }
 
 html_context = {
@@ -63,4 +70,4 @@ html_context = {
 
 html_static_path = []
 
-html_search_language = 'en'
+html_search_language = "en"
