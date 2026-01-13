@@ -9,9 +9,9 @@ import warnings
 
 from copy import copy
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 import astropy.units as u
+from beartype import beartype, typing
 import numpy as np
 import pandas as pd
 import pooch
@@ -26,7 +26,6 @@ from gaiaxpy import calibrate, plot_spectra
 # from gaiaxpy.calibrator.calibrator import __create_merge as create_merge
 from gaiaxpy.core.generic_functions import correlation_to_covariance
 from tqdm import tqdm
-from typeguard import typechecked
 
 from ._version import __version__, __version_tuple__
 
@@ -41,11 +40,11 @@ class CaliStar:
     and magnitude difference with the selected ``gaia_source``.
     """
 
-    @typechecked
+    @beartype
     def __init__(
         self,
-        gaia_source: Union[int, str],
-        gaia_release: Optional[str] = None,
+        gaia_source: typing.Union[int, str],
+        gaia_release: typing.Optional[str] = None,
     ) -> None:
         """
         Parameters
@@ -70,6 +69,8 @@ class CaliStar:
         print("========\ncalistar\n========")
 
         # Check if there is a new version available
+
+        print(f"\nVersion: {__version__}")
 
         calistar_version = (
             f"{__version_tuple__[0]}."
@@ -102,10 +103,8 @@ class CaliStar:
                 & (pypi_split[2] > current_split[2])
             )
 
-        print(f"\nVersion: {__version__}")
-
-        if pypi_version is not None and (new_major | new_minor):
-            print(f"\n-> calistar v{pypi_version} is available!")
+            if new_major | new_minor:
+                print(f"\n-> calistar v{pypi_version} is available!")
 
         # Set attributes of CaliStar
 
@@ -178,14 +177,14 @@ class CaliStar:
                 progressbar=True,
             )
 
-    @typechecked
+    @beartype
     def target_star(
         self,
         write_json: bool = True,
         get_gaiaxp: bool = True,
         allwise_catalog: bool = True,
         print_astroph: bool = False,
-    ) -> Dict[str, Union[float, str, Tuple[float, float]]]:
+    ) -> typing.Dict[str, typing.Union[float, str, int, typing.Tuple[float, float]]]:
         """
         Function for retrieving the the astrometric and
         photometric properties of a target star of interest. The
@@ -971,11 +970,11 @@ class CaliStar:
 
         return target_dict
 
-    @typechecked
+    @beartype
     def find_calib(
         self,
         search_radius: float = 0.1,
-        g_mag_range: Optional[Tuple[float, float]] = None,
+        g_mag_range: typing.Optional[typing.Tuple[float, float]] = None,
         write_csv: bool = True,
     ) -> pd.DataFrame:
         """
@@ -1317,11 +1316,11 @@ class CaliStar:
 
         return cal_df
 
-    @typechecked
+    @beartype
     def select_calib(
         self,
-        filter_names: Optional[List[str]] = None,
-        mag_diff: Union[float, Dict[str, float]] = 0.1,
+        filter_names: typing.Optional[typing.List[str]] = None,
+        mag_diff: typing.Union[float, typing.Dict[str, float]] = 0.1,
         write_csv: bool = True,
     ) -> pd.DataFrame:
         """
