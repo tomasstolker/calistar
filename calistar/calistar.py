@@ -11,7 +11,6 @@ from copy import copy
 from pathlib import Path
 
 import astropy.units as u
-from beartype import beartype, typing
 import numpy as np
 import pandas as pd
 import pooch
@@ -21,6 +20,7 @@ from astropy.table import Table
 from astroquery.gaia import Gaia
 from astroquery.simbad import Simbad
 from astroquery.vizier import Vizier
+from beartype import beartype, typing
 from gaiaxpy import calibrate, plot_spectra
 
 # from gaiaxpy.calibrator.calibrator import __create_merge as create_merge
@@ -420,13 +420,26 @@ class CaliStar:
                     f"+/- {gaia_result['radial_velocity_error'][0]:.2f} km/s"
                 )
 
-        print(
-            f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
-        )
+        if (
+            "astrometric_chi2_al" in gaia_result.columns
+            and "astrometric_n_good_obs_al" in gaia_result.columns
+        ):
+            if not np.ma.is_masked(
+                gaia_result["astrometric_chi2_al"]
+            ) and not np.ma.is_masked(gaia_result["astrometric_n_good_obs_al"]):
+                uwe = np.sqrt(
+                    gaia_result["astrometric_chi2_al"][0]
+                    / (gaia_result["astrometric_n_good_obs_al"][0] - 5.0)
+                )
+                print(f"\nUWE = {uwe:.2f}")
 
         if "ruwe" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["ruwe"]):
                 print(f"RUWE = {gaia_result['ruwe'][0]:.2f}")
+
+        print(
+            f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
+        )
 
         if "non_single_star" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["non_single_star"]):
