@@ -222,8 +222,9 @@ class CaliStar:
         target_dict = {}
 
         # List all Gaia tables
+
         # for table_item in Gaia.load_tables(only_names=True):
-        #     print (table_item.get_qualified_name())
+        #     print(table_item.get_qualified_name())
 
         # Gaia query for selected Gaia source ID
 
@@ -438,7 +439,7 @@ class CaliStar:
                 print(f"RUWE = {gaia_result['ruwe'][0]:.2f}")
 
         print(
-            f"\nAstrometric excess noise = {gaia_result['astrometric_excess_noise'][0]:.2f}"
+            f"\nAstrometric excess noise (mas) = {gaia_result['astrometric_excess_noise'][0]:.2f}"
         )
 
         if "non_single_star" in gaia_result.columns:
@@ -450,6 +451,28 @@ class CaliStar:
                 print(
                     "Single star probability from DSC-Combmod = "
                     f"{gaia_result['classprob_dsc_combmod_star'][0]:.2f}"
+                )
+
+        if "ipd_gof_harmonic_amplitude" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["ipd_gof_harmonic_amplitude"]):
+                print(
+                    f"\nIPD variation of goodness of fit = {gaia_result['ipd_gof_harmonic_amplitude'][0]:.2f}"
+                )
+
+        if "ipd_frac_multi_peak" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["ipd_frac_multi_peak"]):
+                print(
+                    f"IPD fraction with multiple peaks = {gaia_result['ipd_frac_multi_peak'][0]:.2f}"
+                )
+
+        if "bp_rp" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["bp_rp"]):
+                print(f"\nBp - Rp color = {gaia_result['bp_rp'][0]:.2f}")
+
+        if "phot_bp_rp_excess_factor" in gaia_result.columns:
+            if not np.ma.is_masked(gaia_result["phot_bp_rp_excess_factor"]):
+                print(
+                    f"Bp/Rp excess factor = {gaia_result['phot_bp_rp_excess_factor'][0]:.2f}"
                 )
 
         if "has_xp_continuous" in gaia_result.columns:
@@ -478,33 +501,6 @@ class CaliStar:
                 target_dict["metallicity"] = float(gaia_result["mh_gspphot"][0])
                 target_dict["ag_ext"] = float(gaia_result["ag_gspphot"][0])
                 target_dict["azero_ext"] = float(gaia_result["azero_gspphot"][0])
-
-        # Gaia query for selected the astrophysical parameters
-
-        if print_astroph:
-            print("\n-> Querying astrophysical parameters...\n")
-
-            gaia_query = f"""
-            SELECT *
-            FROM gaia{self.gaia_release.lower()}.astrophysical_parameters
-            WHERE source_id = {self.gaia_source}
-            """
-
-            # Launch the Gaia job and get the results
-
-            gaia_job = Gaia.launch_job_async(
-                gaia_query, dump_to_file=False, verbose=False
-            )
-            gaia_result = gaia_job.get_results()
-
-            if len(gaia_result) == 0:
-                print("\nTarget has no data in the astrophysical_parameters catalog")
-
-            else:
-                print("\nAstrophysical parameters:")
-
-                for param_item in gaia_result.columns:
-                    print(f"   - {param_item} = {gaia_result.columns[param_item][0]}")
 
         # Gaia XP spectrum
 
@@ -573,6 +569,55 @@ class CaliStar:
             xp_cov_file = f"gaiaxp_{self.gaia_source}_cov.dat"
             np.savetxt(xp_cov_file, xp_cov, header=header)
             print(f"Storing Gaia XP covariances: {xp_cov_file}")
+
+        # # Gaia query for another table
+        #
+        # gaia_query = f"""
+        # SELECT *
+        # FROM gaia{self.gaia_release.lower()}.vari_spurious_signals
+        # WHERE source_id = {self.gaia_source}
+        # """
+        #
+        # # Launch the Gaia job and get the results
+        #
+        # gaia_job = Gaia.launch_job_async(
+        #     gaia_query, dump_to_file=False, verbose=False
+        # )
+        # gaia_result = gaia_job.get_results()
+        #
+        # if len(gaia_result) == 0:
+        #     print("\nTarget has no data")
+        #
+        # else:
+        #     for param_item in gaia_result.columns:
+        #         print(f"   - {param_item} = {gaia_result.columns[param_item][0]}")
+
+        # Gaia query for selected the astrophysical parameters
+
+        if print_astroph:
+            print("\n-> Querying astrophysical parameters...\n")
+
+            gaia_query = f"""
+            SELECT *
+            FROM gaia{self.gaia_release.lower()}.astrophysical_parameters
+            WHERE source_id = {self.gaia_source}
+            """
+
+            # Launch the Gaia job and get the results
+
+            gaia_job = Gaia.launch_job_async(
+                gaia_query, dump_to_file=False, verbose=False
+            )
+            gaia_astro = gaia_job.get_results()
+
+            if len(gaia_astro) == 0:
+                print("\nTarget has no data in the astrophysical_parameters catalog")
+
+            else:
+                print("\nAstrophysical parameters:")
+
+                for param_item in gaia_astro.columns:
+                    print(f"   - {param_item} = {gaia_astro.columns[param_item][0]}")
 
         # Add spectral type to the Simbad output
 
@@ -1104,6 +1149,9 @@ class CaliStar:
             "RUWE",
             "Non single star",
             "Single star probability",
+            "IPD variation of goodness of fit",
+            "IPD fraction with multiple peaks",
+            "Bp/Rp excess factor",
         ]
 
         columns += self.all_filters
@@ -1275,17 +1323,32 @@ class CaliStar:
                 "astrometric_excess_noise"
             ]
 
-            if "ruwe" in gaia_item:
+            if "ruwe" in gaia_item.columns:
                 cal_df.loc[gaia_item.index, "RUWE"] = gaia_item["ruwe"]
 
-            if "non_single_star" in gaia_item:
+            if "non_single_star" in gaia_item.columns:
                 cal_df.loc[gaia_item.index, "Non single star"] = gaia_item[
                     "non_single_star"
                 ]
 
-            if "classprob_dsc_combmod_star" in gaia_item:
+            if "classprob_dsc_combmod_star" in gaia_item.columns:
                 cal_df.loc[gaia_item.index, "Single star probability"] = gaia_item[
                     "classprob_dsc_combmod_star"
+                ]
+
+            if "ipd_gof_harmonic_amplitude" in gaia_item.columns:
+                cal_df.loc[gaia_item.index, "IPD variation of goodness of fit"] = (
+                    gaia_item["ipd_gof_harmonic_amplitude"]
+                )
+
+            if "ipd_frac_multi_peak" in gaia_item.columns:
+                cal_df.loc[gaia_item.index, "IPD fraction with multiple peaks"] = (
+                    gaia_item["ipd_frac_multi_peak"]
+                )
+
+            if "phot_bp_rp_excess_factor" in gaia_item.columns:
+                cal_df.loc[gaia_item.index, "Bp/Rp excess factor"] = gaia_item[
+                    "phot_bp_rp_excess_factor"
                 ]
 
             # Query The Washington Visual Double Star Catalog
