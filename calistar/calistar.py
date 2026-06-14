@@ -29,7 +29,6 @@ from tqdm import tqdm
 
 from ._version import __version__, __version_tuple__
 
-
 # No limit on the number of rows with a Gaia query
 Gaia.ROW_LIMIT = -1
 
@@ -382,6 +381,8 @@ class CaliStar:
             "hmsdms", alwayssign=True, precision=4, pad=True
         )
 
+        target_dict["Gaia coordinates"] = coord_str
+
         if self.gaia_source != gaia_source_id:
             raise ValueError(
                 f"The requested source ID ({self.gaia_source}) is not "
@@ -437,6 +438,7 @@ class CaliStar:
         if "ruwe" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["ruwe"]):
                 print(f"RUWE = {gaia_result['ruwe'][0]:.2f}")
+                target_dict["RUWE"] = float(gaia_result["ruwe"][0])
 
         print(
             f"\nAstrometric excess noise (mas) = {gaia_result['astrometric_excess_noise'][0]:.2f}"
@@ -456,13 +458,15 @@ class CaliStar:
         if "ipd_gof_harmonic_amplitude" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["ipd_gof_harmonic_amplitude"]):
                 print(
-                    f"\nIPD variation of goodness of fit = {gaia_result['ipd_gof_harmonic_amplitude'][0]:.2f}"
+                    "\nIPD variation of goodness of fit = "
+                    f"{gaia_result['ipd_gof_harmonic_amplitude'][0]:.2f}"
                 )
 
         if "ipd_frac_multi_peak" in gaia_result.columns:
             if not np.ma.is_masked(gaia_result["ipd_frac_multi_peak"]):
                 print(
-                    f"IPD fraction with multiple peaks = {gaia_result['ipd_frac_multi_peak'][0]:.2f}"
+                    "IPD fraction with multiple peaks = "
+                    f"{gaia_result['ipd_frac_multi_peak'][0]:.2f}"
                 )
 
         if "bp_rp" in gaia_result.columns:
