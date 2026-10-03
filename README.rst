@@ -4,7 +4,7 @@
 .. container::
 
     | |PyPI Status| |GitHub Release| |Python Versions| |CI Status| |Docs Status|
-    | |License| |Code Coverage| |Code Quality|
+    | |DOI| |License| |Code Coverage| |Code Quality|
 
 *calistar* is a tool to search for a calibration star. For example to be used for reference-star differential imaging or aperture masking interferometry. The package has been released on `PyPI <https://pypi.org/project/calistar/>`_ and is actively developed and maintained on Github.
 
@@ -39,6 +39,9 @@ Copyright 2026 Tomas Stolker
 
 .. |Docs Status| image:: https://img.shields.io/readthedocs/calistar
    :target: http://calistar.readthedocs.io
+
+.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.23117624.svg
+   :target: https://doi.org/10.5281/zenodo.23117624
 
 .. |License| image:: https://img.shields.io/github/license/tomasstolker/calistar
    :target: https://github.com/tomasstolker/calistar/blob/main/LICENSE
