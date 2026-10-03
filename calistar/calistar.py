@@ -42,7 +42,7 @@ class CaliStar:
     @beartype
     def __init__(
         self,
-        gaia_source: typing.Union[int, str],
+        gaia_source: typing.Union[int, np.int64, str],
         gaia_release: typing.Optional[str] = None,
     ) -> None:
         """
@@ -237,7 +237,7 @@ class CaliStar:
 
         print(f"\n-> Querying GAIA {self.gaia_release}...\n")
 
-        gaia_job = Gaia.launch_job_async(gaia_query, dump_to_file=False, verbose=False)
+        gaia_job = Gaia.launch_job(gaia_query, dump_to_file=False, verbose=False)
         gaia_result = gaia_job.get_results()
 
         # print(gaia_result.columns)
@@ -584,7 +584,7 @@ class CaliStar:
         #
         # # Launch the Gaia job and get the results
         #
-        # gaia_job = Gaia.launch_job_async(
+        # gaia_job = Gaia.launch_job(
         #     gaia_query, dump_to_file=False, verbose=False
         # )
         # gaia_result = gaia_job.get_results()
@@ -609,9 +609,7 @@ class CaliStar:
 
             # Launch the Gaia job and get the results
 
-            gaia_job = Gaia.launch_job_async(
-                gaia_query, dump_to_file=False, verbose=False
-            )
+            gaia_job = Gaia.launch_job(gaia_query, dump_to_file=False, verbose=False)
             gaia_astro = gaia_job.get_results()
 
             if len(gaia_astro) == 0:
@@ -740,8 +738,8 @@ class CaliStar:
             if 1e3 * vizier_tycho["_r"] > 10.0:
                 warnings.warn(
                     "The separation between the Gaia and TYCHO source "
-                    "is more than 10 mas. Please check carefully if "
-                    "these are indeed the same sources."
+                    f"is {1e3 * vizier_tycho['_r']:.1f} mas. Please "
+                    "check carefully if these are indeed the same sources."
                 )
 
             if np.ma.is_masked(vizier_tycho["e_BTmag"]):
@@ -801,8 +799,8 @@ class CaliStar:
             if 1e3 * vizier_2mass["_r"] > 10.0:
                 warnings.warn(
                     "The separation between the Gaia and 2MASS source "
-                    "is more than 10 mas. Please check carefully if "
-                    "these are indeed the same sources."
+                    f"is {1e3 * vizier_2mass['_r']:.1f} mas. Please "
+                    "check carefully if these are indeed the same sources."
                 )
 
             if np.ma.is_masked(vizier_2mass["e_Jmag"]):
@@ -885,8 +883,8 @@ class CaliStar:
             if 1e3 * vizier_wise["_r"] > 10.0:
                 warnings.warn(
                     "The separation between the Gaia and WISE source "
-                    "is more than 10 mas. Please check carefully if "
-                    "these are indeed the same sources."
+                    f"is {1e3 * vizier_wise['_r']:.1f} mas. Please "
+                    "check carefully if these are indeed the same sources."
                 )
 
             if np.ma.is_masked(vizier_wise["e_W1mag"]):
@@ -1140,7 +1138,7 @@ class CaliStar:
 
         # Launch the Gaia job and get the results
 
-        gaia_job = Gaia.launch_job_async(gaia_query, dump_to_file=False, verbose=False)
+        gaia_job = Gaia.launch_job(gaia_query, dump_to_file=False, verbose=False)
         gaia_results = gaia_job.get_results()
         print(f"Number of found sources: {len(gaia_results)}")
 
@@ -1316,7 +1314,7 @@ class CaliStar:
                 # FROM gaia{self.gaia_release.lower()}.allwise_best_neighbour
                 # WHERE source_id = {self.gaia_source}
                 # """
-                # gaia_job = Gaia.launch_job_async(gaia_query,
+                # gaia_job = Gaia.launch_job(gaia_query,
                 # dump_to_file=False, verbose=False)
                 # gaia_result = gaia_job.get_results()
 

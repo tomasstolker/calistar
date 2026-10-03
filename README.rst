@@ -3,7 +3,8 @@
 
 .. container::
 
-    |PyPI Status| |Python Versions| |CI Status| |Docs Status| |Code Coverage| |Code Quality| |License|
+    | |PyPI Status| |GitHub Release| |Python Versions| |CI Status| |Docs Status|
+    | |License| |Code Coverage| |Code Quality|
 
 *calistar* is a tool to search for a calibration star. For example to be used for reference-star differential imaging or aperture masking interferometry. The package has been released on `PyPI <https://pypi.org/project/calistar/>`_ and is actively developed and maintained on Github.
 
@@ -27,6 +28,9 @@ Copyright 2026 Tomas Stolker
 .. |PyPI Status| image:: https://img.shields.io/pypi/v/calistar
    :target: https://pypi.python.org/pypi/calistar
 
+.. |GitHub Release| image:: https://img.shields.io/github/v/release/tomasstolker/calistar
+   :target: https://github.com/tomasstolker/calistar/releases
+
 .. |Python Versions| image:: https://img.shields.io/pypi/pyversions/calistar
    :target: https://pypi.python.org/pypi/calistar
 
@@ -36,11 +40,11 @@ Copyright 2026 Tomas Stolker
 .. |Docs Status| image:: https://img.shields.io/readthedocs/calistar
    :target: http://calistar.readthedocs.io
 
+.. |License| image:: https://img.shields.io/github/license/tomasstolker/calistar
+   :target: https://github.com/tomasstolker/calistar/blob/main/LICENSE
+
 .. |Code Coverage| image:: https://codecov.io/gh/tomasstolker/calistar/branch/main/graph/badge.svg?token=LSSCPMJ5JH
    :target: https://codecov.io/gh/tomasstolker/calistar
 
 .. |Code Quality| image:: https://img.shields.io/codefactor/grade/github/tomasstolker/calistar
    :target: https://www.codefactor.io/repository/github/tomasstolker/calistar
-
-.. |License| image:: https://img.shields.io/github/license/tomasstolker/calistar
-   :target: https://github.com/tomasstolker/calistar/blob/main/LICENSE
