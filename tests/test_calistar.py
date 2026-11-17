@@ -23,6 +23,15 @@ class TestCaliStar:
 
         assert isinstance(self.cal_star, calistar.calistar.CaliStar)
 
+    def test_simbad_server(self) -> None:
+
+        cal_star = calistar.CaliStar(
+            gaia_source=self.gaia_source,
+            simbad_server="simbad.harvard.edu",
+        )
+
+        assert cal_star.simbad.server == "simbad.harvard.edu"
+
     def test_target_star(self) -> None:
 
         self.cal_star.target_star(

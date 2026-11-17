@@ -42,6 +42,7 @@ class CaliStar:
         self,
         gaia_source: typing.Union[int, np.int64, str],
         gaia_release: typing.Optional[str] = None,
+        simbad_server: typing.Optional[str] = None,
     ) -> None:
         """
         Parameters
@@ -56,6 +57,9 @@ class CaliStar:
             Data release of the Gaia catalog that will be used for the
             queries (``"DR2"``, ``"EDR3"``, or ``"DR3"``). The default
             release is DR3 when the argument is set to ``None``.
+        simbad_server : str, None
+            SIMBAD mirror to use for queries. The default mirror is used
+            when the argument is set to ``None``.
 
         Returns
         -------
@@ -64,6 +68,11 @@ class CaliStar:
         """
 
         print("========\ncalistar\n========")
+
+        self.simbad = Simbad()
+
+        if simbad_server is not None:
+            self.simbad.server = simbad_server
 
         # Check if there is a new version available
 
@@ -624,7 +633,7 @@ class CaliStar:
         # for item in Simbad.list_votable_fields():
         #     print(item)
 
-        Simbad.add_votable_fields(
+        self.simbad.add_votable_fields(
             "sp_type",
             "ids",
             "sp",
@@ -644,7 +653,7 @@ class CaliStar:
 
         print("\n-> Querying Simbad...\n")
 
-        simbad_result = Simbad.query_object(
+        simbad_result = self.simbad.query_object(
             f"GAIA {self.gaia_release} {self.gaia_source}"
         )
 
@@ -1094,7 +1103,7 @@ class CaliStar:
 
         # print(Simbad.list_votable_fields())
 
-        Simbad.add_votable_fields(
+        self.simbad.add_votable_fields(
             "sp_type",
             "ids",
             # "flux(J)",
@@ -1209,7 +1218,7 @@ class CaliStar:
                 "phot_g_mean_mag"
             ]
 
-            simbad_result = Simbad.query_object(
+            simbad_result = self.simbad.query_object(
                 f"GAIA {self.gaia_release} {gaia_source_id}"
             )
 
