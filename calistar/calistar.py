@@ -6,7 +6,6 @@ import json
 import socket
 import urllib.request
 import warnings
-
 from copy import copy
 from pathlib import Path
 
@@ -14,7 +13,6 @@ import astropy.units as u
 import numpy as np
 import pandas as pd
 import pooch
-
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 from astroquery.gaia import Gaia

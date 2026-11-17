@@ -1,5 +1,5 @@
 import os
-import pytest
+
 import calistar
 
 
@@ -31,7 +31,9 @@ class TestCaliStar:
 
     def test_find_calib(self) -> None:
 
-        self.cal_star.find_calib(search_radius=1.0, g_mag_range=(-1.0, 1.0), write_csv=True)
+        self.cal_star.find_calib(
+            search_radius=1.0, g_mag_range=(-1.0, 1.0), write_csv=True
+        )
 
     def test_select_calib(self) -> None:
 
