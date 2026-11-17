@@ -43,6 +43,7 @@ class CaliStar:
         gaia_source: typing.Union[int, np.int64, str],
         gaia_release: typing.Optional[str] = None,
         simbad_server: typing.Optional[str] = None,
+        vizier_server: typing.Optional[str] = None,
     ) -> None:
         """
         Parameters
@@ -60,6 +61,9 @@ class CaliStar:
         simbad_server : str, None
             SIMBAD mirror to use for queries. The default mirror is used
             when the argument is set to ``None``.
+        vizier_server : str, None
+            VizieR mirror to use for queries. The default mirror is used
+            when the argument is set to ``None``.
 
         Returns
         -------
@@ -73,6 +77,11 @@ class CaliStar:
 
         if simbad_server is not None:
             self.simbad.server = simbad_server
+
+        self.vizier = Vizier()
+
+        if vizier_server is not None:
+            self.vizier.VIZIER_SERVER = vizier_server
 
         # Check if there is a new version available
 
@@ -713,6 +722,7 @@ class CaliStar:
             timeout=10.0,
             row_limit=1,
         )
+        vizier_obj.VIZIER_SERVER = self.vizier.VIZIER_SERVER
 
         radius = u.Quantity(1.0 * u.arcmin)
 
@@ -1185,6 +1195,7 @@ class CaliStar:
         warnings.filterwarnings("ignore", category=UserWarning)
 
         vizier_obj = Vizier(columns=["*", "+_r"], timeout=10.0, row_limit=1)
+        vizier_obj.VIZIER_SERVER = self.vizier.VIZIER_SERVER
 
         for gaia_item in tqdm(gaia_results):
             if "SOURCE_ID" in gaia_item.columns:
