@@ -59,11 +59,15 @@ class CaliStar:
             queries (``"DR2"``, ``"EDR3"``, or ``"DR3"``). The default
             release is DR3 when the argument is set to ``None``.
         simbad_server : str, None
-            SIMBAD mirror to use for queries. The default mirror is used
-            when the argument is set to ``None``.
+            SIMBAD server URL to use for queries. The default url
+            (``"simbad.cds.unistra.fr"``) is used when the argument is
+            set to ``None``. If the main server is down, a mirror such
+            as ``"simbad.harvard.edu"`` can be used.
         vizier_server : str, None
-            VizieR mirror to use for queries. The default mirror is used
-            when the argument is set to ``None``.
+            VizieR server URL to use for queries. The default url
+            (``"vizier.cds.unistra.fr"``) is used when the argument is
+            set to ``None``. If the main server is down, a mirror such as
+            ``"vizier.cfa.harvard.edu"`` can be used.
 
         Returns
         -------
@@ -73,13 +77,15 @@ class CaliStar:
 
         print("========\ncalistar\n========")
 
+        # Internal Simbad instance to carry server url
+        # No check for None in astroquery so we have to set it as an attribute below
         self.simbad = Simbad()
-
         if simbad_server is not None:
             self.simbad.server = simbad_server
 
+        # Internal Vizier instance to carry server url
+        # Like Simbad, needs to be set as an attribute
         self.vizier = Vizier()
-
         if vizier_server is not None:
             self.vizier.VIZIER_SERVER = vizier_server
 
