@@ -44,6 +44,7 @@ class CaliStar:
         gaia_release: typing.Optional[str] = None,
         simbad_server: typing.Optional[str] = None,
         vizier_server: typing.Optional[str] = None,
+        vizier_timeout: float = 10.0,
     ) -> None:
         """
         Parameters
@@ -68,6 +69,8 @@ class CaliStar:
             (``"vizier.cds.unistra.fr"``) is used when the argument is
             set to ``None``. If the main server is down, a mirror such as
             ``"vizier.cfa.harvard.edu"`` can be used.
+        vizier_timeout : float
+            Timeout in seconds for VizieR queries.
 
         Returns
         -------
@@ -88,6 +91,7 @@ class CaliStar:
         self.vizier = Vizier()
         if vizier_server is not None:
             self.vizier.VIZIER_SERVER = vizier_server
+        self.vizier_timeout = vizier_timeout
 
         # Check if there is a new version available
 
@@ -725,7 +729,7 @@ class CaliStar:
         vizier_obj = Vizier(
             columns=["*", "+_r", "BTmag", "e_BTmag", "VTmag", "e_VTmag"],
             catalog=["I/259/tyc2", "II/246/out", "II/328/allwise", "II/311/wise"],
-            timeout=10.0,
+            timeout=self.vizier_timeout,
             row_limit=1,
         )
         vizier_obj.VIZIER_SERVER = self.vizier.VIZIER_SERVER
@@ -1200,7 +1204,9 @@ class CaliStar:
 
         warnings.filterwarnings("ignore", category=UserWarning)
 
-        vizier_obj = Vizier(columns=["*", "+_r"], timeout=10.0, row_limit=1)
+        vizier_obj = Vizier(
+            columns=["*", "+_r"], timeout=self.vizier_timeout, row_limit=1
+        )
         vizier_obj.VIZIER_SERVER = self.vizier.VIZIER_SERVER
 
         for gaia_item in tqdm(gaia_results):
