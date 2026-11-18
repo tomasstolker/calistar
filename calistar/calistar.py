@@ -6,7 +6,6 @@ import json
 import socket
 import urllib.request
 import warnings
-
 from copy import copy
 from pathlib import Path
 
@@ -14,7 +13,6 @@ import astropy.units as u
 import numpy as np
 import pandas as pd
 import pooch
-
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 from astroquery.gaia import Gaia
@@ -44,6 +42,8 @@ class CaliStar:
         self,
         gaia_source: typing.Union[int, np.int64, str],
         gaia_release: typing.Optional[str] = None,
+        simbad_server: typing.Optional[str] = None,
+        vizier_server: typing.Optional[str] = None,
     ) -> None:
         """
         Parameters
@@ -58,6 +58,16 @@ class CaliStar:
             Data release of the Gaia catalog that will be used for the
             queries (``"DR2"``, ``"EDR3"``, or ``"DR3"``). The default
             release is DR3 when the argument is set to ``None``.
+        simbad_server : str, None
+            SIMBAD server URL to use for queries. The default url
+            (``"simbad.cds.unistra.fr"``) is used when the argument is
+            set to ``None``. If the main server is down, a mirror such
+            as ``"simbad.harvard.edu"`` can be used.
+        vizier_server : str, None
+            VizieR server URL to use for queries. The default url
+            (``"vizier.cds.unistra.fr"``) is used when the argument is
+            set to ``None``. If the main server is down, a mirror such as
+            ``"vizier.cfa.harvard.edu"`` can be used.
 
         Returns
         -------
@@ -66,6 +76,18 @@ class CaliStar:
         """
 
         print("========\ncalistar\n========")
+
+        # Internal Simbad instance to carry server url
+        # No check for None in astroquery so we have to set it as an attribute below
+        self.simbad = Simbad()
+        if simbad_server is not None:
+            self.simbad.server = simbad_server
+
+        # Internal Vizier instance to carry server url
+        # Like Simbad, needs to be set as an attribute
+        self.vizier = Vizier()
+        if vizier_server is not None:
+            self.vizier.VIZIER_SERVER = vizier_server
 
         # Check if there is a new version available
 
@@ -626,7 +648,7 @@ class CaliStar:
         # for item in Simbad.list_votable_fields():
         #     print(item)
 
-        Simbad.add_votable_fields(
+        self.simbad.add_votable_fields(
             "sp_type",
             "ids",
             "sp",
@@ -646,7 +668,7 @@ class CaliStar:
 
         print("\n-> Querying Simbad...\n")
 
-        simbad_result = Simbad.query_object(
+        simbad_result = self.simbad.query_object(
             f"GAIA {self.gaia_release} {self.gaia_source}"
         )
 
@@ -706,6 +728,7 @@ class CaliStar:
             timeout=10.0,
             row_limit=1,
         )
+        vizier_obj.VIZIER_SERVER = self.vizier.VIZIER_SERVER
 
         radius = u.Quantity(1.0 * u.arcmin)
 
@@ -1096,7 +1119,7 @@ class CaliStar:
 
         # print(Simbad.list_votable_fields())
 
-        Simbad.add_votable_fields(
+        self.simbad.add_votable_fields(
             "sp_type",
             "ids",
             # "flux(J)",
@@ -1178,6 +1201,7 @@ class CaliStar:
         warnings.filterwarnings("ignore", category=UserWarning)
 
         vizier_obj = Vizier(columns=["*", "+_r"], timeout=10.0, row_limit=1)
+        vizier_obj.VIZIER_SERVER = self.vizier.VIZIER_SERVER
 
         for gaia_item in tqdm(gaia_results):
             if "SOURCE_ID" in gaia_item.columns:
@@ -1211,7 +1235,7 @@ class CaliStar:
                 "phot_g_mean_mag"
             ]
 
-            simbad_result = Simbad.query_object(
+            simbad_result = self.simbad.query_object(
                 f"GAIA {self.gaia_release} {gaia_source_id}"
             )
 

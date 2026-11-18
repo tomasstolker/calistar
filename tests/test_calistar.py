@@ -1,5 +1,5 @@
 import os
-import pytest
+
 import calistar
 
 
@@ -23,6 +23,22 @@ class TestCaliStar:
 
         assert isinstance(self.cal_star, calistar.calistar.CaliStar)
 
+    def test_cds_servers(self) -> None:
+
+        cal_star = calistar.CaliStar(
+            gaia_source=self.gaia_source,
+            simbad_server="simbad.harvard.edu",
+            vizier_server="vizier.cfa.harvard.edu",
+        )
+
+        assert cal_star.simbad.server == "simbad.harvard.edu"
+        assert cal_star.vizier.VIZIER_SERVER == "vizier.cfa.harvard.edu"
+
+        cal_star.target_star(
+            write_json=True, get_gaiaxp=False, allwise_catalog=True
+        )
+
+
     def test_target_star(self) -> None:
 
         self.cal_star.target_star(
@@ -31,7 +47,9 @@ class TestCaliStar:
 
     def test_find_calib(self) -> None:
 
-        self.cal_star.find_calib(search_radius=1.0, g_mag_range=(-1.0, 1.0), write_csv=True)
+        self.cal_star.find_calib(
+            search_radius=1.0, g_mag_range=(-1.0, 1.0), write_csv=True
+        )
 
     def test_select_calib(self) -> None:
 
