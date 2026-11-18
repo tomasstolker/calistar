@@ -60,3 +60,10 @@ packages = ["calistar"]
 [tool.setuptools_scm]
 write_to = "calistar/_version.py"
 local_scheme = "no-local-version"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not integration'"
+markers = [
+    "integration: tests that use online services or other external resources",
+]

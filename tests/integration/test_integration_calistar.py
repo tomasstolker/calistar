@@ -1,6 +1,10 @@
 import os
 
+import pytest
+
 import calistar
+
+pytestmark = pytest.mark.integration
 
 
 class TestCaliStar:
@@ -34,10 +38,7 @@ class TestCaliStar:
         assert cal_star.simbad.server == "simbad.harvard.edu"
         assert cal_star.vizier.VIZIER_SERVER == "vizier.cfa.harvard.edu"
 
-        cal_star.target_star(
-            write_json=True, get_gaiaxp=False, allwise_catalog=True
-        )
-
+        cal_star.target_star(write_json=True, get_gaiaxp=False, allwise_catalog=True)
 
     def test_target_star(self) -> None:
 
