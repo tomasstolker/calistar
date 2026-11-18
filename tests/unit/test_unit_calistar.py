@@ -34,12 +34,19 @@ def patched_dependencies(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
 
 
-def test_attributes():
+def test_calistar_init():
     star = calistar.CaliStar(gaia_source="1")
     assert star.gaia_source == 1
     assert star.gaia_release == "DR3"
     assert star.gaia_idx == 3
     assert star.simbad.server == "simbad.cds.unistra.fr"
+    assert star.vizier.VIZIER_SERVER == "vizier.cds.unistra.fr"
+    assert isinstance(star, calistar.calistar.CaliStar)
+
+def test_cds_server_args():
+    star = calistar.CaliStar(gaia_source="1", simbad_server="abc", vizier_server="dfg")
+    assert star.simbad.server == "abc"
+    assert star.vizier.VIZIER_SERVER == "dfg"
 
 
 def test_constructor_rejects_unknown_gaia_release():

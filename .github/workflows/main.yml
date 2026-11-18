@@ -36,9 +36,16 @@ jobs:
         run: |
           make docs
 
-      - name: Run pytest
+      - name: Run unit tests
         run: |
           make test
+
+      - name: Run integration tests
+        env:
+          CALISTAR_TEST_SIMBAD_SERVER: simbad.harvard.edu
+          CALISTAR_TEST_VIZIER_SERVER: vizier.cfa.harvard.edu
+        run: |
+          python -m pytest tests/integration -m integration
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
